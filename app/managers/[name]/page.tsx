@@ -18,7 +18,8 @@ export default function ManagerPage() {
           Back
         </button>
 
-        <div
+            <div className="flex items-center gap-4">
+                <div
             className="h-24 w-24 overflow-hidden rounded-xl border bg-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-300 transition"
             title="Manager photo"
             >
