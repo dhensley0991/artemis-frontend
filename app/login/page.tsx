@@ -113,7 +113,7 @@ export default function LoginPage() {
         {/* LOGO RIGHT SIDE */}
         <div className="hidden md:flex items-center justify-center">
           <img
-            src="/artemis-logo.png"
+            src="/artemis-transparent-logo.png"
             alt="Artemis Logo"
             className="w-72 opacity-90"
           />
