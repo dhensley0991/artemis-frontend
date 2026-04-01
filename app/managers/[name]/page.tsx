@@ -18,36 +18,35 @@ export default function ManagerPage() {
           Back
         </button>
 
-            {/* Wrapper for photo + name */}
-            <div className="flex items-center gap-4">
-
-            {/* Stack photo + label vertically */}
-            <div className="flex flex-col items-center gap-2">
-
-                {/* Photo box */}
-                <div
-                className="h-24 w-24 overflow-hidden rounded-xl border bg-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-300 transition"
-                title="Manager photo"
-                >
-                {/* Fallback initial */}
-                <span className="text-2xl font-bold text-slate-600">
-                    {managerName?.[0] || "?"}
-                </span>
-                </div>
-
-                {/* Label under photo */}
-                <span className="text-xs text-slate-500">
-                Manager Photo
-                </span>
-
+        {/* Wrapper for photo + name */}
+        <div className="flex items-center gap-4">
+          {/* Stack photo + label vertically */}
+          <div className="flex flex-col items-center gap-2">
+            {/* Photo box */}
+            <div
+              className="h-24 w-24 overflow-hidden rounded-xl border bg-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-300 transition"
+              title="Manager photo"
+            >
+              {/* Fallback initial */}
+              <span className="text-2xl font-bold text-slate-600">
+                {managerName?.[0] || "?"}
+              </span>
             </div>
 
-            {/* Name section continues here */}
-            <div>
+            {/* Label under photo */}
+            <span className="text-xs text-slate-500">
+              Manager Photo
+            </span>
+          </div>
 
+          {/* Name section */}
           <div>
-            <h1 className="text-3xl font-semibold text-slate-900">{managerName}</h1>
-            <p className="mt-1 text-sm text-slate-500">Fund Manager Profile</p>
+            <h1 className="text-3xl font-semibold text-slate-900">
+              {managerName}
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Fund Manager Profile
+            </p>
           </div>
         </div>
 
