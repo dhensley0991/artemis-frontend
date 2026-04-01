@@ -18,6 +18,15 @@ export default function ManagerPage() {
           Back
         </button>
 
+        <div className="mb-6">
+            <button
+                onClick={() => router.push("/managers/create")}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            >
+                Create Manager
+            </button>
+        </div>
+
         {/* Wrapper for photo + name */}
         <div className="flex items-center gap-4">
           {/* Stack photo + label vertically */}
