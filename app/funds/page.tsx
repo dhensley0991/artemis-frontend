@@ -389,7 +389,7 @@ export default function FundsPage() {
                           <span
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/managers/${encodeURIComponent(fund.admin_name)}`);
+                              router.push(`/managers/${encodeURIComponent(fund.admin_name || "")}`);
                             }}
                             className="cursor-pointer text-blue-600 underline"
                           >
