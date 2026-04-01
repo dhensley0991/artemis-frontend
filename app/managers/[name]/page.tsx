@@ -18,12 +18,14 @@ export default function ManagerPage() {
           Back
         </button>
 
-        <div className="flex items-center gap-4">
-          <div className="h-24 w-24 overflow-hidden rounded-xl border bg-slate-200 flex items-center justify-center">
+        <div
+            className="h-24 w-24 overflow-hidden rounded-xl border bg-slate-200 flex items-center justify-center cursor-pointer hover:bg-slate-300 transition"
+            title="Manager photo"
+            >
             <span className="text-2xl font-bold text-slate-600">
                 {managerName?.[0] || "?"}
             </span>
-          </div>
+        </div>
 
           <div>
             <h1 className="text-3xl font-semibold text-slate-900">{managerName}</h1>
