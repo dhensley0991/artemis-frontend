@@ -21,7 +21,7 @@ export default function LoginPage() {
       body.append("username", subscriptionId);
       body.append("password", password);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
