@@ -385,7 +385,17 @@ export default function FundsPage() {
                         <td className="px-4 py-3">{fund.name}</td>
                         <td className="px-4 py-3">{fund.strategy}</td>
                         <td className="px-4 py-3">{fund.base_currency}</td>
-                        <td className="px-4 py-3">{fund.admin_name}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/managers/${encodeURIComponent(fund.admin_name)}`);
+                            }}
+                            className="cursor-pointer text-blue-600 underline"
+                          >
+                            {fund.admin_name}
+                          </span>
+                        </td>
                         <td className="px-4 py-3">{fund.domicile_country}</td>
                         <td className="px-4 py-3">{fund.firm_id}</td>
                         <td className="px-4 py-3">{fund.account_number || "-"}</td>
