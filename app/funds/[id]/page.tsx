@@ -66,7 +66,15 @@ export default function FundDetailPage() {
       <div className="space-y-2">
         <div>Strategy: {fund.strategy}</div>
         <div>Currency: {fund.base_currency}</div>
-        <div>Admin: {fund.admin_name}</div>
+        <div>
+            Admin:{" "}
+            <span
+                onClick={() => router.push(`/managers/${encodeURIComponent(fund.admin_name || "")}`)}
+                className="cursor-pointer text-blue-600 underline"
+            >
+                {fund.admin_name}
+            </span>
+        </div>
         <div>Country: {fund.domicile_country}</div>
         <div>Firm ID: {fund.firm_id}</div>
         <div>Account #: {fund.account_number}</div>
