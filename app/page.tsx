@@ -40,8 +40,8 @@ const bellPreview = [
 
 export default function Page() {
   const router = useRouter();
-  const [fundsCount, setFundsCount] = useState(0);
-  const [firmsCount, setFirmsCount] = useState(0);
+  const [fundsCount, setFundsCount] = useState<number | null>(null);
+  const [firmsCount, setFirmsCount] = useState<number | null>(null);
 
   const handleLogout = () => {
     localStorage.removeItem("artemis_token");
@@ -150,14 +150,18 @@ export default function Page() {
           <Link href="/firms" className="block">
             <div className="cursor-pointer rounded-3xl border bg-white p-5 shadow-sm transition hover:border-slate-400 hover:shadow-md">
               <p className="text-sm text-slate-500">Firms</p>
-              <p className="mt-3 text-2xl font-semibold">{firmsCount}</p>
+              <p className="mt-3 text-2xl font-semibold">
+                {firmsCount === null ? "..." : firmsCount}
+              </p>
             </div>
           </Link>
 
           <Link href="/funds" className="block">
             <div className="cursor-pointer rounded-3xl border bg-white p-5 shadow-sm transition hover:border-slate-400 hover:shadow-md">
               <p className="text-sm text-slate-500">Funds</p>
-              <p className="mt-3 text-2xl font-semibold">{fundsCount}</p>
+              <p className="mt-3 text-2xl font-semibold">
+                {fundsCount === null ? "..." : fundsCount}
+              </p>
             </div>
           </Link>
 

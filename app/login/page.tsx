@@ -17,10 +17,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const body = new URLSearchParams();
-      body.append("username", subscriptionId);
-      body.append("password", password);
-
+      
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {

@@ -373,21 +373,25 @@ export default function FundsPage() {
                     <th className="px-4 py-3">Account Number</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {funds.map((fund) => (
-                    <tr key={fund.id} className="border-b last:border-b-0">
-                      <td className="px-4 py-3">{fund.id}</td>
-                      <td className="px-4 py-3">{fund.fund_id || "-"}</td>
-                      <td className="px-4 py-3 font-medium">{fund.name}</td>
-                      <td className="px-4 py-3">{fund.strategy || "-"}</td>
-                      <td className="px-4 py-3">{fund.base_currency || "-"}</td>
-                      <td className="px-4 py-3">{fund.admin_name || "-"}</td>
-                      <td className="px-4 py-3">{fund.domicile_country || "-"}</td>
-                      <td className="px-4 py-3">{fund.firm_id ?? "-"}</td>
-                      <td className="px-4 py-3">{fund.account_number || "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
+                  <tbody>
+                    {funds.map((fund) => (
+                      <tr
+                        key={fund.id}
+                        onClick={() => router.push(`/funds/${fund.id}`)}
+                        className="cursor-pointer hover:bg-slate-50 transition"
+                      >
+                        <td className="px-4 py-3">{fund.id}</td>
+                        <td className="px-4 py-3">{fund.fund_id || "-"}</td>
+                        <td className="px-4 py-3">{fund.name}</td>
+                        <td className="px-4 py-3">{fund.strategy}</td>
+                        <td className="px-4 py-3">{fund.base_currency}</td>
+                        <td className="px-4 py-3">{fund.admin_name}</td>
+                        <td className="px-4 py-3">{fund.domicile_country}</td>
+                        <td className="px-4 py-3">{fund.firm_id}</td>
+                        <td className="px-4 py-3">{fund.account_number || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
               </table>
             </div>
           )}
