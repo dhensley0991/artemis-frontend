@@ -115,7 +115,7 @@ export default function LoginPage() {
           <img
             src="/artemis-transparent-logo.png"
             alt="Artemis Logo"
-            className="w-72 opacity-90"
+            className="w-200 opacity-90"
           />
         </div>
 
