@@ -19,8 +19,10 @@ export default function ManagerPage() {
         </button>
 
         <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-300 text-2xl font-bold">
-            {managerName?.[0] || "?"}
+          <div className="h-24 w-24 overflow-hidden rounded-xl border bg-slate-200 flex items-center justify-center">
+            <span className="text-2xl font-bold text-slate-600">
+                {managerName?.[0] || "?"}
+            </span>
           </div>
 
           <div>
