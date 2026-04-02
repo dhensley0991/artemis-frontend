@@ -427,7 +427,7 @@ export default function FundDetailPage() {
             <section className="xl:col-span-5 rounded-[28px] border border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-blue-500/[0.05] to-white/[0.03] p-6 shadow-2xl backdrop-blur-xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">Sexy NAV Preview</h2>
+                  <h2 className="text-xl font-semibold text-white">NAV Preview/ Data Stack</h2>
                   <p className="mt-1 text-sm text-slate-300">
                     Snapshot of the last computed NAV with live preview capability.
                   </p>
