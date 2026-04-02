@@ -118,38 +118,7 @@ export default function FundDetailPage() {
 
     </div>
 
-      <button
-        onClick={() => router.push("/funds")}
-        className="mb-4 px-4 py-2 border rounded"
-      >
-        Back
-      </button>
-
-      <h1 className="text-2xl font-bold mb-4">{fund.name}</h1>
-
-      <div className="space-y-2">
-        <div>Strategy: {fund.strategy}</div>
-        <div>Currency: {fund.base_currency}</div>
-        <div className="flex items-center gap-3">
-            {/* Profile box (placeholder) */}
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-sm font-bold">
-                {fund.admin_name?.[0] || "?"}
-            </div>
-
-            {/* Clickable admin name */}
-            <div>
-                <span
-                onClick={() => router.push(`/managers/${encodeURIComponent(fund.admin_name || "")}`)}
-                className="cursor-pointer text-blue-600 underline"
-                >
-                {fund.admin_name}
-                </span>
-            </div>
-         </div>
-        <div>Country: {fund.domicile_country}</div>
-        <div>Firm ID: {fund.firm_id}</div>
-        <div>Account #: {fund.account_number}</div>
-      </div>
+      
     </div>
     </main>
   );
