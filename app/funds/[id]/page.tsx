@@ -150,7 +150,7 @@ export default function FundDetailPage() {
         <div>Firm ID: {fund.firm_id}</div>
         <div>Account #: {fund.account_number}</div>
       </div>
-    
+    </div>
     </main>
   );
 }
