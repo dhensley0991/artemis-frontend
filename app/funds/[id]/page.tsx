@@ -53,7 +53,71 @@ export default function FundDetailPage() {
   if (!fund) return <div className="p-6">No fund found</div>;
 
   return (
-    <div className="p-6">
+
+  <main className="min-h-screen bg-slate-100 p-6">
+    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <h1 className="text-3xl font-semibold text-slate-900">
+        {fund.name}
+        </h1>
+        <p className="mt-2 text-sm text-slate-500">
+        Fund detail dashboard
+        </p>
+    </div>
+
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div className="xl:col-span-3 rounded-2xl border bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-slate-900">Fund Overview</h2>
+
+    <div className="mt-4 space-y-3 text-sm">
+    <div>
+        <span className="text-slate-500">Fund ID: </span>
+        <span className="font-medium">{fund.fund_id || "-"}</span>
+    </div>
+
+    <div>
+        <span className="text-slate-500">Strategy: </span>
+        <span className="font-medium">{fund.strategy}</span>
+    </div>
+
+    <div>
+        <span className="text-slate-500">Currency: </span>
+        <span className="font-medium">{fund.base_currency}</span>
+    </div>
+
+    <div>
+        <span className="text-slate-500">Domicile: </span>
+        <span className="font-medium">{fund.domicile_country}</span>
+    </div>
+
+    <div>
+        <span className="text-slate-500">Account: </span>
+        <span className="font-medium">{fund.account_number || "-"}</span>
+    </div>
+    </div>
+
+    <div className="xl:col-span-5 rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-slate-900">NAV Preview</h2>
+    </div>
+
+    <div className="xl:col-span-4 rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-slate-900">Operations / Accounts</h2>
+    </div>
+
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div className="xl:col-span-8 rounded-2xl border bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-slate-900">Documents Vault</h2>
+        </div>
+
+    <div className="xl:col-span-4 rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-slate-900">Recent Activity</h2>
+    </div>
+</div>
+
+    </div>    
+
+    </div>
+
       <button
         onClick={() => router.push("/funds")}
         className="mb-4 px-4 py-2 border rounded"
@@ -86,6 +150,7 @@ export default function FundDetailPage() {
         <div>Firm ID: {fund.firm_id}</div>
         <div>Account #: {fund.account_number}</div>
       </div>
-    </div>
+    
+    </main>
   );
 }
