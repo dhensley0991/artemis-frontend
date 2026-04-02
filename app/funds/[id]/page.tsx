@@ -219,15 +219,15 @@ export default function FundDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-950 text-white">
+      <main className="min-h-screen bg-black text-white">
         <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="animate-pulse rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div className="animate-pulse rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
             <div className="h-8 w-64 rounded bg-white/10" />
             <div className="mt-4 h-4 w-96 rounded bg-white/10" />
             <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-12">
-              <div className="h-72 rounded-3xl bg-white/5 xl:col-span-3" />
-              <div className="h-72 rounded-3xl bg-white/5 xl:col-span-5" />
-              <div className="h-72 rounded-3xl bg-white/5 xl:col-span-4" />
+              <div className="h-72 rounded-[28px] bg-white/[0.03] xl:col-span-3" />
+              <div className="h-72 rounded-[28px] bg-white/[0.03] xl:col-span-5" />
+              <div className="h-72 rounded-[28px] bg-white/[0.03] xl:col-span-4" />
             </div>
           </div>
         </div>
@@ -237,9 +237,9 @@ export default function FundDetailPage() {
 
   if (pageError) {
     return (
-      <main className="min-h-screen bg-slate-950 text-white">
+      <main className="min-h-screen bg-black text-white">
         <div className="mx-auto max-w-4xl px-6 py-12">
-          <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
+          <div className="rounded-[28px] border border-red-500/30 bg-red-500/10 p-8">
             <h1 className="text-2xl font-semibold">Fund page failed to load</h1>
             <p className="mt-3 text-red-200">{pageError}</p>
             <button
@@ -256,9 +256,9 @@ export default function FundDetailPage() {
 
   if (!fund || !navSnapshot) {
     return (
-      <main className="min-h-screen bg-slate-950 text-white">
+      <main className="min-h-screen bg-black text-white">
         <div className="mx-auto max-w-4xl px-6 py-12">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+          <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
             <h1 className="text-2xl font-semibold">Fund not found</h1>
             <button
               onClick={() => router.push("/funds")}
@@ -273,15 +273,15 @@ export default function FundDetailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.25),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(168,85,247,0.18),_transparent_24%),linear-gradient(to_bottom,_#020617,_#0f172a)]">
+    <main className="min-h-screen bg-black text-white">
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.06),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.04),_transparent_22%),linear-gradient(to_bottom,_#000000,_#0a0a0a,_#111111,_#1f1f1f)]">
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
-          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+          <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200">
-                  Artemis NAV
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-slate-300">
+                  Artemis Fund Dashboard
                 </div>
 
                 <div>
@@ -289,27 +289,27 @@ export default function FundDetailPage() {
                     {fund.name}
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm text-slate-300">
-                    Institutional fund dashboard with NAV intelligence, operational visibility,
-                    and document workflow in one screen.
+                    High-visibility fund intelligence page with NAV monitoring, operational data,
+                    and workflow controls in one institutional view.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                       Strategy
                     </p>
                     <p className="mt-1 font-medium text-white">{fund.strategy}</p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                       Currency
                     </p>
                     <p className="mt-1 font-medium text-white">{fund.base_currency}</p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                       Domicile
                     </p>
@@ -318,14 +318,14 @@ export default function FundDetailPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                       Fund ID
                     </p>
                     <p className="mt-1 font-medium text-white">{fund.fund_id || "-"}</p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                       Primary Account
                     </p>
@@ -337,7 +337,7 @@ export default function FundDetailPage() {
               <div className="flex flex-col gap-3 xl:items-end">
                 <button
                   onClick={() => router.push("/funds")}
-                  className="rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                  className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
                 >
                   ← Back to Funds
                 </button>
@@ -345,7 +345,7 @@ export default function FundDetailPage() {
                 <button
                   onClick={handleCalculateNav}
                   disabled={isCalculating}
-                  className="rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-2xl bg-gradient-to-r from-neutral-200 to-neutral-400 px-5 py-3 text-sm font-semibold text-black shadow-lg shadow-black/30 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isCalculating ? "Calculating NAV..." : "Calculate NAV"}
                 </button>
@@ -363,13 +363,13 @@ export default function FundDetailPage() {
             <section className="xl:col-span-3 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Fund Overview</h2>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
-                  Reference
+                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                  Overview
                 </div>
               </div>
 
               <div className="mt-6 space-y-5">
-                <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4">
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Fund Name</p>
                   <p className="mt-2 text-lg font-medium text-white">{fund.name}</p>
                 </div>
@@ -403,10 +403,10 @@ export default function FundDetailPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-cyan-200">Fund Admin</p>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Fund Admin</p>
                   <div className="mt-3 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-300 to-blue-500 text-base font-bold text-slate-950">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-neutral-200 to-neutral-500 text-base font-bold text-black">
                       {fund.admin_name?.[0] || "?"}
                     </div>
                     <button
@@ -414,7 +414,7 @@ export default function FundDetailPage() {
                       onClick={() =>
                         router.push(`/managers/${encodeURIComponent(fund.admin_name || "")}`)
                       }
-                      className="text-left text-sm font-medium text-cyan-200 underline decoration-cyan-400/40 underline-offset-4 hover:text-white"
+                      className="text-left text-sm font-medium text-slate-200 underline decoration-white/30 underline-offset-4 hover:text-white"
                     >
                       {fund.admin_name || "Unassigned"}
                     </button>
@@ -424,17 +424,17 @@ export default function FundDetailPage() {
             </section>
 
             {/* Center: NAV Preview */}
-            <section className="xl:col-span-5 rounded-[28px] border border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-blue-500/[0.05] to-white/[0.03] p-6 shadow-2xl backdrop-blur-xl">
+            <section className="xl:col-span-5 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-black/40 p-6 shadow-2xl backdrop-blur-xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">NAV Preview/ Data Stack</h2>
+                  <h2 className="text-xl font-semibold text-white">NAV Preview</h2>
                   <p className="mt-1 text-sm text-slate-300">
-                    Snapshot of the last computed NAV with live preview capability.
+                    Latest computed valuation and real-time preview metrics.
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-right">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-cyan-200">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-right">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                     Last Computed NAV
                   </p>
                   <p className="mt-1 text-sm font-medium text-white">{navSnapshot.navDate}</p>
@@ -471,7 +471,7 @@ export default function FundDetailPage() {
                 </div>
               </div>
 
-              <div className="mt-5 rounded-[24px] border border-white/10 bg-slate-950/50 p-4">
+              <div className="mt-5 rounded-[24px] border border-white/10 bg-black/35 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-medium text-white">NAV Trend</p>
                   <p className="text-xs text-slate-400">Last 7 valuation points</p>
@@ -479,16 +479,16 @@ export default function FundDetailPage() {
 
                 <svg viewBox="0 0 520 220" className="h-56 w-full">
                   <defs>
-                    <linearGradient id="navLineGlow" x1="0%" x2="100%" y1="0%" y2="0%">
-                      <stop offset="0%" stopColor="#22d3ee" />
-                      <stop offset="100%" stopColor="#3b82f6" />
+                    <linearGradient id="navLineMono" x1="0%" x2="100%" y1="0%" y2="0%">
+                      <stop offset="0%" stopColor="#e5e7eb" />
+                      <stop offset="100%" stopColor="#9ca3af" />
                     </linearGradient>
                   </defs>
 
                   <path
                     d={chartPath}
                     fill="none"
-                    stroke="url(#navLineGlow)"
+                    stroke="url(#navLineMono)"
                     strokeWidth="4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -505,7 +505,7 @@ export default function FundDetailPage() {
 
                     return (
                       <g key={point.label}>
-                        <circle cx={x} cy={y} r="5" fill="#22d3ee" />
+                        <circle cx={x} cy={y} r="5" fill="#d4d4d8" />
                         <text x={x} y="214" textAnchor="middle" fill="#94a3b8" fontSize="11">
                           {point.label}
                         </text>
@@ -525,17 +525,17 @@ export default function FundDetailPage() {
 
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Status</p>
-                  <p className="mt-2 text-xl font-semibold text-emerald-300">Ready to Calculate</p>
+                  <p className="mt-2 text-xl font-semibold text-slate-200">Ready to Calculate</p>
                 </div>
               </div>
             </section>
 
-            {/* Right: Operations / Accounts */}
+            {/* Right: Data Stack */}
             <section className="xl:col-span-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Operations / Accounts</h2>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
-                  Ops
+                <h2 className="text-xl font-semibold">Data Stack</h2>
+                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                  Stack
                 </div>
               </div>
 
@@ -556,11 +556,6 @@ export default function FundDetailPage() {
                 </div>
 
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Fund Administrator</p>
-                  <p className="mt-1 text-lg font-medium text-white">{fund.admin_name || "TBD"}</p>
-                </div>
-
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Auditor</p>
                   <p className="mt-1 text-lg font-medium text-white">TBD</p>
                 </div>
@@ -573,22 +568,22 @@ export default function FundDetailPage() {
             <section className="xl:col-span-8 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Documents Vault</h2>
-                <button className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10">
+                <button className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium hover:bg-white/[0.08]">
                   Upload Document
                 </button>
               </div>
 
               <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-5 text-sm text-slate-300">
                   Investor Letters
                 </div>
-                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-5 text-sm text-slate-300">
                   Subscription Documents
                 </div>
-                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-5 text-sm text-slate-300">
                   Financial Statements
                 </div>
-                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-5 text-sm text-slate-300">
                   Legal / Organizational Docs
                 </div>
               </div>
