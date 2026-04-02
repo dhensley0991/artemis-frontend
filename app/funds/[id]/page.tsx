@@ -1,15 +1,142 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+
+type Fund = {
+  id: number;
+  fund_id?: string | null;
+  name: string;
+  strategy: string;
+  base_currency: string;
+  admin_name?: string | null;
+  domicile_country: string;
+  firm_id: number;
+  account_number?: string | null;
+};
+
+type NavPoint = {
+  label: string;
+  value: number;
+};
+
+type NavSnapshot = {
+  navDate: string;
+  navPerUnit: number;
+  grossAssets: number;
+  netAssets: number;
+  unitsOutstanding: number;
+  pendingFlow: number;
+};
+
+function formatMoney(value: number, currency = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatCompactMoney(value: number, currency = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function countryLabel(codeOrName: string) {
+  const map: Record<string, string> = {
+    US: "United States",
+    SG: "Singapore",
+    KY: "Cayman Islands",
+    GB: "United Kingdom",
+    IE: "Ireland",
+    LU: "Luxembourg",
+    CH: "Switzerland",
+    AE: "United Arab Emirates",
+  };
+  return map[codeOrName] || codeOrName || "-";
+}
+
+function buildInitialSnapshot(fund: Fund): NavSnapshot {
+  const seed = (fund.id || 1) * 137;
+
+  const unitsOutstanding = 390_000 + (seed % 40_000);
+  const navPerUnit = 97 + ((seed % 1200) / 100);
+  const grossAssets = unitsOutstanding * navPerUnit * 1.045;
+  const netAssets = unitsOutstanding * navPerUnit;
+  const pendingFlow = 250_000 + (seed % 1_250_000);
+
+  return {
+    navDate: "2026-03-31",
+    navPerUnit,
+    grossAssets,
+    netAssets,
+    unitsOutstanding,
+    pendingFlow,
+  };
+}
+
+function buildNavSeries(snapshot: NavSnapshot): NavPoint[] {
+  const end = snapshot.navPerUnit;
+  const values = [
+    end * 0.93,
+    end * 0.945,
+    end * 0.958,
+    end * 0.972,
+    end * 0.981,
+    end * 0.991,
+    end,
+  ];
+
+  return [
+    { label: "Sep", value: values[0] },
+    { label: "Oct", value: values[1] },
+    { label: "Nov", value: values[2] },
+    { label: "Dec", value: values[3] },
+    { label: "Jan", value: values[4] },
+    { label: "Feb", value: values[5] },
+    { label: "Mar", value: values[6] },
+  ];
+}
+
+function buildChartPath(points: NavPoint[], width: number, height: number, padding = 18) {
+  if (points.length === 0) return "";
+
+  const values = points.map((p) => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(max - min, 1);
+
+  const stepX = (width - padding * 2) / Math.max(points.length - 1, 1);
+
+  const coords = points.map((point, i) => {
+    const x = padding + i * stepX;
+    const y = height - padding - ((point.value - min) / range) * (height - padding * 2);
+    return { x, y };
+  });
+
+  return coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x} ${c.y}`).join(" ");
+}
 
 export default function FundDetailPage() {
   const params = useParams();
   const router = useRouter();
 
-  const [fund, setFund] = useState<any>(null);
+  const [fund, setFund] = useState<Fund | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [pageError, setPageError] = useState("");
+  const [calcMessage, setCalcMessage] = useState("");
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [navSnapshot, setNavSnapshot] = useState<NavSnapshot | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("artemis_token");
@@ -22,6 +149,7 @@ export default function FundDetailPage() {
     const loadFund = async () => {
       try {
         setLoading(true);
+        setPageError("");
 
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/funds/${params.id}`,
@@ -36,10 +164,11 @@ export default function FundDetailPage() {
           throw new Error(`Fund request failed: ${res.status}`);
         }
 
-        const data = await res.json();
+        const data: Fund = await res.json();
         setFund(data);
+        setNavSnapshot(buildInitialSnapshot(data));
       } catch (err) {
-        setError("Failed to load fund");
+        setPageError(err instanceof Error ? err.message : "Failed to load fund");
       } finally {
         setLoading(false);
       }
@@ -48,78 +177,441 @@ export default function FundDetailPage() {
     loadFund();
   }, [params.id, router]);
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (error) return <div className="p-6 text-red-600">{error}</div>;
-  if (!fund) return <div className="p-6">No fund found</div>;
+  const navSeries = useMemo(() => {
+    if (!navSnapshot) return [];
+    return buildNavSeries(navSnapshot);
+  }, [navSnapshot]);
+
+  const chartPath = useMemo(() => {
+    return buildChartPath(navSeries, 520, 220);
+  }, [navSeries]);
+
+  const handleCalculateNav = async () => {
+    if (!navSnapshot) return;
+
+    setIsCalculating(true);
+    setCalcMessage("");
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 850));
+
+      const nextNavPerUnit = Number((navSnapshot.navPerUnit * 1.0027).toFixed(2));
+      const nextNetAssets = Number((navSnapshot.unitsOutstanding * nextNavPerUnit).toFixed(2));
+      const nextGrossAssets = Number((nextNetAssets * 1.044).toFixed(2));
+      const nextPendingFlow = Math.max(0, Number((navSnapshot.pendingFlow * 0.84).toFixed(2)));
+
+      setNavSnapshot({
+        ...navSnapshot,
+        navDate: new Date().toISOString().slice(0, 10),
+        navPerUnit: nextNavPerUnit,
+        netAssets: nextNetAssets,
+        grossAssets: nextGrossAssets,
+        pendingFlow: nextPendingFlow,
+      });
+
+      setCalcMessage("NAV preview recalculated.");
+    } catch {
+      setCalcMessage("NAV calculation failed.");
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white">
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="animate-pulse rounded-3xl border border-white/10 bg-white/5 p-8">
+            <div className="h-8 w-64 rounded bg-white/10" />
+            <div className="mt-4 h-4 w-96 rounded bg-white/10" />
+            <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-12">
+              <div className="h-72 rounded-3xl bg-white/5 xl:col-span-3" />
+              <div className="h-72 rounded-3xl bg-white/5 xl:col-span-5" />
+              <div className="h-72 rounded-3xl bg-white/5 xl:col-span-4" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (pageError) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white">
+        <div className="mx-auto max-w-4xl px-6 py-12">
+          <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8">
+            <h1 className="text-2xl font-semibold">Fund page failed to load</h1>
+            <p className="mt-3 text-red-200">{pageError}</p>
+            <button
+              onClick={() => router.push("/funds")}
+              className="mt-6 rounded-xl border border-white/20 px-4 py-2 text-sm font-medium hover:bg-white/10"
+            >
+              Back to Funds
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!fund || !navSnapshot) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white">
+        <div className="mx-auto max-w-4xl px-6 py-12">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+            <h1 className="text-2xl font-semibold">Fund not found</h1>
+            <button
+              onClick={() => router.push("/funds")}
+              className="mt-6 rounded-xl border border-white/20 px-4 py-2 text-sm font-medium hover:bg-white/10"
+            >
+              Back to Funds
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.25),_transparent_30%),radial-gradient(circle_at_top_right,_rgba(168,85,247,0.18),_transparent_24%),linear-gradient(to_bottom,_#020617,_#0f172a)]">
+        <div className="mx-auto max-w-7xl px-6 py-8">
+          {/* Header */}
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-cyan-200">
+                  Artemis NAV
+                </div>
 
-  <main className="min-h-screen bg-slate-100 p-6">
-    <div className="mx-auto max-w-7xl space-y-6">
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h1 className="text-3xl font-semibold text-slate-900">
-        {fund.name}
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">
-        Fund detail dashboard
-        </p>
-    </div>
+                <div>
+                  <h1 className="text-4xl font-semibold tracking-tight text-white">
+                    {fund.name}
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-sm text-slate-300">
+                    Institutional fund dashboard with NAV intelligence, operational visibility,
+                    and document workflow in one screen.
+                  </p>
+                </div>
 
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="xl:col-span-3 rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">Fund Overview</h2>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Strategy
+                    </p>
+                    <p className="mt-1 font-medium text-white">{fund.strategy}</p>
+                  </div>
 
-    <div className="mt-4 space-y-3 text-sm">
-    <div>
-        <span className="text-slate-500">Fund ID: </span>
-        <span className="font-medium">{fund.fund_id || "-"}</span>
-    </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Currency
+                    </p>
+                    <p className="mt-1 font-medium text-white">{fund.base_currency}</p>
+                  </div>
 
-    <div>
-        <span className="text-slate-500">Strategy: </span>
-        <span className="font-medium">{fund.strategy}</span>
-    </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Domicile
+                    </p>
+                    <p className="mt-1 font-medium text-white">
+                      {countryLabel(fund.domicile_country)}
+                    </p>
+                  </div>
 
-    <div>
-        <span className="text-slate-500">Currency: </span>
-        <span className="font-medium">{fund.base_currency}</span>
-    </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Fund ID
+                    </p>
+                    <p className="mt-1 font-medium text-white">{fund.fund_id || "-"}</p>
+                  </div>
 
-    <div>
-        <span className="text-slate-500">Domicile: </span>
-        <span className="font-medium">{fund.domicile_country}</span>
-    </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Primary Account
+                    </p>
+                    <p className="mt-1 font-medium text-white">{fund.account_number || "-"}</p>
+                  </div>
+                </div>
+              </div>
 
-    <div>
-        <span className="text-slate-500">Account: </span>
-        <span className="font-medium">{fund.account_number || "-"}</span>
-    </div>
-    </div>
+              <div className="flex flex-col gap-3 xl:items-end">
+                <button
+                  onClick={() => router.push("/funds")}
+                  className="rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  ← Back to Funds
+                </button>
 
-    <div className="xl:col-span-5 rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">NAV Preview</h2>
-    </div>
+                <button
+                  onClick={handleCalculateNav}
+                  disabled={isCalculating}
+                  className="rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCalculating ? "Calculating NAV..." : "Calculate NAV"}
+                </button>
 
-    <div className="xl:col-span-4 rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Operations / Accounts</h2>
-    </div>
+                <div className="text-right text-xs text-slate-400">
+                  {calcMessage ? calcMessage : "Last computed NAV available below."}
+                </div>
+              </div>
+            </div>
+          </div>
 
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="xl:col-span-8 rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-900">Documents Vault</h2>
+          {/* Main Grid */}
+          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
+            {/* Left: Fund overview */}
+            <section className="xl:col-span-3 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Fund Overview</h2>
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                  Reference
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-5">
+                <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Fund Name</p>
+                  <p className="mt-2 text-lg font-medium text-white">{fund.name}</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Fund ID</p>
+                    <p className="mt-1 font-medium text-white">{fund.fund_id || "-"}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Strategy</p>
+                    <p className="mt-1 font-medium text-white">{fund.strategy}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Base Currency</p>
+                    <p className="mt-1 font-medium text-white">{fund.base_currency}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Domicile</p>
+                    <p className="mt-1 font-medium text-white">
+                      {countryLabel(fund.domicile_country)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Firm ID</p>
+                    <p className="mt-1 font-medium text-white">{fund.firm_id}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-cyan-200">Fund Admin</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-300 to-blue-500 text-base font-bold text-slate-950">
+                      {fund.admin_name?.[0] || "?"}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(`/managers/${encodeURIComponent(fund.admin_name || "")}`)
+                      }
+                      className="text-left text-sm font-medium text-cyan-200 underline decoration-cyan-400/40 underline-offset-4 hover:text-white"
+                    >
+                      {fund.admin_name || "Unassigned"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Center: NAV Preview */}
+            <section className="xl:col-span-5 rounded-[28px] border border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-blue-500/[0.05] to-white/[0.03] p-6 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Sexy NAV Preview</h2>
+                  <p className="mt-1 text-sm text-slate-300">
+                    Snapshot of the last computed NAV with live preview capability.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-right">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-cyan-200">
+                    Last Computed NAV
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-white">{navSnapshot.navDate}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">NAV / Unit</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {formatMoney(navSnapshot.navPerUnit, fund.base_currency || "USD")}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Pending Flow</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {formatCompactMoney(navSnapshot.pendingFlow, fund.base_currency || "USD")}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Gross Assets</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {formatCompactMoney(navSnapshot.grossAssets, fund.base_currency || "USD")}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Net Assets</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {formatCompactMoney(navSnapshot.netAssets, fund.base_currency || "USD")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-[24px] border border-white/10 bg-slate-950/50 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-medium text-white">NAV Trend</p>
+                  <p className="text-xs text-slate-400">Last 7 valuation points</p>
+                </div>
+
+                <svg viewBox="0 0 520 220" className="h-56 w-full">
+                  <defs>
+                    <linearGradient id="navLineGlow" x1="0%" x2="100%" y1="0%" y2="0%">
+                      <stop offset="0%" stopColor="#22d3ee" />
+                      <stop offset="100%" stopColor="#3b82f6" />
+                    </linearGradient>
+                  </defs>
+
+                  <path
+                    d={chartPath}
+                    fill="none"
+                    stroke="url(#navLineGlow)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+
+                  {navSeries.map((point, index) => {
+                    const values = navSeries.map((p) => p.value);
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+                    const range = Math.max(max - min, 1);
+                    const padding = 18;
+                    const x = padding + index * ((520 - padding * 2) / Math.max(navSeries.length - 1, 1));
+                    const y = 220 - padding - ((point.value - min) / range) * (220 - padding * 2);
+
+                    return (
+                      <g key={point.label}>
+                        <circle cx={x} cy={y} r="5" fill="#22d3ee" />
+                        <text x={x} y="214" textAnchor="middle" fill="#94a3b8" fontSize="11">
+                          {point.label}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Units Outstanding</p>
+                  <p className="mt-2 text-xl font-semibold text-white">
+                    {formatNumber(navSnapshot.unitsOutstanding)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Status</p>
+                  <p className="mt-2 text-xl font-semibold text-emerald-300">Ready to Calculate</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Right: Operations / Accounts */}
+            <section className="xl:col-span-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Operations / Accounts</h2>
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                  Ops
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Prime Broker</p>
+                  <p className="mt-1 text-lg font-medium text-white">TBD</p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Primary Account</p>
+                  <p className="mt-1 text-lg font-medium text-white">{fund.account_number || "-"}</p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Custodian</p>
+                  <p className="mt-1 text-lg font-medium text-white">TBD</p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Fund Administrator</p>
+                  <p className="mt-1 text-lg font-medium text-white">{fund.admin_name || "TBD"}</p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Auditor</p>
+                  <p className="mt-1 text-lg font-medium text-white">TBD</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Bottom Row */}
+          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
+            <section className="xl:col-span-8 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Documents Vault</h2>
+                <button className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10">
+                  Upload Document
+                </button>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                  Investor Letters
+                </div>
+                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                  Subscription Documents
+                </div>
+                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                  Financial Statements
+                </div>
+                <div className="rounded-2xl border border-dashed border-white/15 bg-slate-900/40 p-5 text-sm text-slate-300">
+                  Legal / Organizational Docs
+                </div>
+              </div>
+            </section>
+
+            <section className="xl:col-span-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+              <h2 className="text-xl font-semibold">Recent Activity</h2>
+
+              <div className="mt-5 space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-200">
+                  Subscription submitted
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-200">
+                  Redemption pending
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-200">
+                  NAV preview recalculated
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
-
-    <div className="xl:col-span-4 rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Recent Activity</h2>
-    </div>
-</div>
-
-    </div>    
-
-    </div>
-
-      
-    </div>
+      </div>
     </main>
   );
 }
