@@ -177,13 +177,15 @@ function buildChartPath(
   ============================================================================
   TOOLTIP COPY
   ----------------------------------------------------------------------------
-  Shared hover copy for "Primary Account" across the page.
-  This refers to the external brokerage / custody account link.
+  Shared hover copy for system identifiers used across the page.
   ============================================================================
 */
 
 const PRIMARY_ACCOUNT_TOOLTIP =
   "API Data Link. Used with your existing Brokerage Account and used for: Custodian / broker linkage, Cash + asset flows, Trade settlement, Real-world money movement. This is your bank/broker account identifier.";
+
+const FUND_ID_TOOLTIP =
+  "Fund ID, this is your internal reference number.";
 
 /*
   ============================================================================
@@ -205,10 +207,6 @@ export default function FundDetailPage() {
   /*
     ==========================================================================
     LOAD FUND
-    --------------------------------------------------------------------------
-    - Reads auth token from localStorage
-    - Redirects to login if no token exists
-    - Loads fund detail from backend using params.id
     ==========================================================================
   */
   useEffect(() => {
@@ -267,10 +265,6 @@ export default function FundDetailPage() {
   /*
     ==========================================================================
     NAV PREVIEW ACTION
-    --------------------------------------------------------------------------
-    Temporary preview recalculation.
-    Future:
-    - Replace with live backend NAV strike endpoint
     ==========================================================================
   */
   const handleCalculateNav = async () => {
@@ -309,11 +303,6 @@ export default function FundDetailPage() {
     }
   };
 
-  /*
-    ==========================================================================
-    LOADING STATE
-    ==========================================================================
-  */
   if (loading) {
     return (
       <main className="min-h-screen bg-black text-white">
@@ -332,11 +321,6 @@ export default function FundDetailPage() {
     );
   }
 
-  /*
-    ==========================================================================
-    ERROR STATE
-    ==========================================================================
-  */
   if (pageError) {
     return (
       <main className="min-h-screen bg-black text-white">
@@ -356,11 +340,6 @@ export default function FundDetailPage() {
     );
   }
 
-  /*
-    ==========================================================================
-    NULL STATE
-    ==========================================================================
-  */
   if (!fund || !navSnapshot) {
     return (
       <main className="min-h-screen bg-black text-white">
@@ -379,21 +358,11 @@ export default function FundDetailPage() {
     );
   }
 
-  /*
-    ==========================================================================
-    MAIN PAGE
-    ==========================================================================
-  */
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.05),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.03),_transparent_22%),linear-gradient(to_bottom,_#000000,_#090909,_#141414,_#1d1d1d)]">
         <div className="mx-auto max-w-7xl px-6 py-8">
           <div className="relative">
-            {/* 
-              LEFT-SIDE LOGO PRESENTATION
-              ---------------------------------------------------------------
-              Decorative brand placement for larger screens only
-            */}
             <div className="pointer-events-none absolute -left-[290px] top-[8px] hidden xl:flex h-[300px] w-[300px] items-center justify-center">
               <img
                 src="/artemis-transparent-logo.png"
@@ -402,13 +371,6 @@ export default function FundDetailPage() {
               />
             </div>
 
-            {/* 
-              ================================================================
-              PAGE HEADER
-              ---------------------------------------------------------------
-              Top-level fund identity strip + primary CTA actions
-              ================================================================
-            */}
             <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
               <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                 <div className="space-y-4">
@@ -426,11 +388,6 @@ export default function FundDetailPage() {
                     </p>
                   </div>
 
-                  {/* 
-                    HEADER METADATA CARDS
-                    -----------------------------------------------------------
-                    Quick-read institutional identifiers
-                  */}
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
                     <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                       <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
@@ -456,18 +413,15 @@ export default function FundDetailPage() {
                     </div>
 
                     <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      <p
+                        className="text-[11px] uppercase tracking-[0.18em] text-slate-400 cursor-help"
+                        title={FUND_ID_TOOLTIP}
+                      >
                         Fund ID
                       </p>
                       <p className="mt-1 font-medium text-[#F1D36B]">{fund.fund_id || "-"}</p>
                     </div>
 
-                    {/* 
-                      PRIMARY ACCOUNT
-                      ---------------------------------------------------------
-                      Hover label explains that this is the future external
-                      brokerage / custody account linkage field.
-                    */}
                     <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
                       <p
                         className="text-[11px] uppercase tracking-[0.18em] text-slate-400 cursor-help"
@@ -482,11 +436,6 @@ export default function FundDetailPage() {
                   </div>
                 </div>
 
-                {/* 
-                  HEADER ACTIONS
-                  ---------------------------------------------------------------
-                  Back navigation + NAV calculation CTA
-                */}
                 <div className="flex flex-col gap-3 xl:items-end">
                   <button
                     onClick={() => router.push("/funds")}
@@ -510,17 +459,7 @@ export default function FundDetailPage() {
               </div>
             </div>
 
-            {/* 
-              ================================================================
-              MAIN CONTENT GRID
-              ================================================================
-            */}
             <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
-              {/* 
-                ==============================================================
-                LEFT COLUMN: FUND OVERVIEW
-                ==============================================================
-              */}
               <section className="xl:col-span-3 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-[#D4AF37]">Fund Overview</h2>
@@ -539,7 +478,10 @@ export default function FundDetailPage() {
 
                   <div className="grid grid-cols-1 gap-3">
                     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                      <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                      <p
+                        className="text-xs uppercase tracking-[0.18em] text-slate-400 cursor-help"
+                        title={FUND_ID_TOOLTIP}
+                      >
                         Fund ID
                       </p>
                       <p className="mt-1 font-medium text-[#F1D36B]">{fund.fund_id || "-"}</p>
@@ -576,11 +518,6 @@ export default function FundDetailPage() {
                     </div>
                   </div>
 
-                  {/* 
-                    FUND ADMIN CARD
-                    -----------------------------------------------------------
-                    Clicking the admin routes into a manager profile page later
-                  */}
                   <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                       Fund Admin
@@ -603,11 +540,6 @@ export default function FundDetailPage() {
                 </div>
               </section>
 
-              {/* 
-                ==============================================================
-                CENTER COLUMN: NAV PREVIEW
-                ==============================================================
-              */}
               <section className="xl:col-span-5 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-black/40 p-6 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -665,11 +597,6 @@ export default function FundDetailPage() {
                   </div>
                 </div>
 
-                {/* 
-                  NAV TREND CHART
-                  -------------------------------------------------------------
-                  SVG-based chart for lightweight institutional visualization
-                */}
                 <div className="mt-5 rounded-[24px] border border-white/10 bg-black/35 p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-sm font-medium text-[#D4AF37]">NAV Trend</p>
@@ -741,11 +668,6 @@ export default function FundDetailPage() {
                 </div>
               </section>
 
-              {/* 
-                ==============================================================
-                RIGHT COLUMN: DATA STACK
-                ==============================================================
-              */}
               <section className="xl:col-span-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-[#D4AF37]">Data Stack</h2>
@@ -762,12 +684,6 @@ export default function FundDetailPage() {
                     <p className="mt-1 text-lg font-medium text-[#F1D36B]">TBD</p>
                   </div>
 
-                  {/* 
-                    PRIMARY ACCOUNT (DATA STACK VIEW)
-                    ---------------------------------------------------------
-                    Same field as header card, repeated here in infrastructure
-                    context for the fund's external account mapping layer.
-                  */}
                   <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                     <p
                       className="text-xs uppercase tracking-[0.18em] text-slate-400 cursor-help"
@@ -797,17 +713,7 @@ export default function FundDetailPage() {
               </section>
             </div>
 
-            {/* 
-              ================================================================
-              BOTTOM ROW
-              ================================================================
-            */}
             <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
-              {/* 
-                DOCUMENTS VAULT
-                ---------------------------------------------------------------
-                Placeholder document categories for future storage integrations
-              */}
               <section className="xl:col-span-8 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Documents Vault</h2>
@@ -832,11 +738,6 @@ export default function FundDetailPage() {
                 </div>
               </section>
 
-              {/* 
-                RECENT ACTIVITY
-                ---------------------------------------------------------------
-                Placeholder activity feed until wired to backend events
-              */}
               <section className="xl:col-span-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
                 <h2 className="text-xl font-semibold">Recent Activity</h2>
 
