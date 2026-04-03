@@ -47,6 +47,7 @@ export default function AddInvestorPage() {
 
   useEffect(() => {
     const token = localStorage.getItem("artemis_token");
+    console.log("TOKEN:", token);
 
     if (!token) {
       router.push("/login");
