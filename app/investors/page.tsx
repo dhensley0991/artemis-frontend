@@ -107,7 +107,7 @@ export default function InvestorsPage() {
         setError("");
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/investor-report`,
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reporting/investor-accounts`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
