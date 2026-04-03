@@ -1,7 +1,30 @@
 "use client";
 
+/*
+  ============================================================================
+  FIRMS PAGE
+  ----------------------------------------------------------------------------
+  Purpose:
+  - Display all firms in the Artemis system
+  - Allow super admin users to create a new firm
+  - Match the same institutional black / gold design language as /funds
+
+  Notes:
+  - Uses Artemis JWT token from localStorage
+  - Loads firms from the backend /firms endpoint
+  - Create Firm panel is expandable / collapsible
+  - Styled to visually align with the current Artemis fund pages
+  ============================================================================
+*/
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+/*
+  ============================================================================
+  TYPES
+  ============================================================================
+*/
 
 type Firm = {
   id: number;
@@ -23,6 +46,12 @@ type Firm = {
   account_number?: string | null;
 };
 
+/*
+  ============================================================================
+  COUNTRY OPTIONS
+  ============================================================================
+*/
+
 const countryOptions = [
   { code: "US", label: "United States" },
   { code: "KY", label: "Cayman Islands" },
@@ -36,9 +65,20 @@ const countryOptions = [
   { code: "AU", label: "Australia" },
 ];
 
+/*
+  ============================================================================
+  PAGE COMPONENT
+  ============================================================================
+*/
+
 export default function FirmsPage() {
   const router = useRouter();
 
+  /*
+    --------------------------------------------------------------------------
+    UI STATE
+    --------------------------------------------------------------------------
+  */
   const [showCreateFirm, setShowCreateFirm] = useState(false);
   const [firms, setFirms] = useState<Firm[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +86,11 @@ export default function FirmsPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  /*
+    --------------------------------------------------------------------------
+    FORM STATE
+    --------------------------------------------------------------------------
+  */
   const [name, setName] = useState("");
   const [primaryAdminName, setPrimaryAdminName] = useState("");
   const [email, setEmail] = useState("");
@@ -62,6 +107,13 @@ export default function FirmsPage() {
   const [formationDate, setFormationDate] = useState("");
   const [ein, setEin] = useState("");
 
+  /*
+    ==========================================================================
+    LOAD FIRMS
+    --------------------------------------------------------------------------
+    Pulls firms from backend using saved Artemis token
+    ==========================================================================
+  */
   const loadFirms = async () => {
     const token = localStorage.getItem("artemis_token");
 
@@ -84,6 +136,11 @@ export default function FirmsPage() {
     setFirms(Array.isArray(data) ? data : []);
   };
 
+  /*
+    ==========================================================================
+    INITIAL LOAD
+    ==========================================================================
+  */
   useEffect(() => {
     const token = localStorage.getItem("artemis_token");
 
@@ -107,6 +164,11 @@ export default function FirmsPage() {
     run();
   }, [router]);
 
+  /*
+    ==========================================================================
+    CREATE FIRM
+    ==========================================================================
+  */
   const handleCreateFirm = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -153,6 +215,11 @@ export default function FirmsPage() {
         throw new Error(data.detail || `Create firm failed: ${res.status}`);
       }
 
+      /*
+        ----------------------------------------------------------------------
+        RESET FORM AFTER SUCCESS
+        ----------------------------------------------------------------------
+      */
       setName("");
       setPrimaryAdminName("");
       setEmail("");
@@ -180,292 +247,397 @@ export default function FirmsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950">
-      <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-        <div className="mb-6 rounded-3xl border bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight">Firms</h1>
-              <p className="mt-2 text-sm text-slate-500">
-                View pertinent information about the management company or create a new entity.
-              </p>
-            </div>
+    <main className="min-h-screen bg-black text-white">
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.05),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.03),_transparent_22%),linear-gradient(to_bottom,_#000000,_#090909,_#141414,_#1d1d1d)]">
+        <div className="mx-auto max-w-7xl px-6 py-8">
+          {/* 
+            ==================================================================
+            PAGE HEADER
+            ==================================================================
+          */}
+          <section className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-slate-300">
+                  Artemis Firms Dashboard
+                </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowCreateFirm((prev) => !prev)}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                {showCreateFirm ? "Close Create Firm" : "Create Firm"}
-              </button>
+                <div>
+                  <h1 className="bg-gradient-to-r from-[#F1D36B] via-[#D4AF37] to-[#B8962E] bg-clip-text text-4xl font-semibold tracking-tight text-transparent">
+                    Firms
+                  </h1>
+                  <p className="mt-2 max-w-3xl text-sm text-slate-300">
+                    View pertinent information about the management company, review
+                    existing entities, and create a new firm within the Artemis control framework.
+                  </p>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => router.push("/managers/create")}
-                className="rounded-xl border px-4 py-2 text-sm font-medium hover:bg-slate-50"
-              >
-                Add Fund Admin
-              </button>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Total Firms
+                    </p>
+                    <p className="mt-1 font-medium text-[#F1D36B]">{firms.length}</p>
+                  </div>
 
-              <button
-                type="button"
-                onClick={() => router.push("/")}
-                className="rounded-xl border px-4 py-2 text-sm font-medium hover:bg-slate-50"
-              >
-                Back to Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Create Panel
+                    </p>
+                    <p className="mt-1 font-medium text-[#F1D36B]">
+                      {showCreateFirm ? "Open" : "Closed"}
+                    </p>
+                  </div>
 
-        {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Load Status
+                    </p>
+                    <p className="mt-1 font-medium text-[#F1D36B]">
+                      {loading ? "Loading" : "Ready"}
+                    </p>
+                  </div>
 
-        {success && (
-          <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {success}
-          </div>
-        )}
-
-        {showCreateFirm && (
-          <div className="mb-6 rounded-3xl border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold">Create New Firm</h2>
-
-            <form
-              onSubmit={handleCreateFirm}
-              className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-            >
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Firm Name</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="Artemis NAV Technologies"
-                  required
-                />
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      Save Status
+                    </p>
+                    <p className="mt-1 font-medium text-[#F1D36B]">
+                      {saving ? "Saving" : "Idle"}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Primary Admin Name</label>
-                <input
-                  value={primaryAdminName}
-                  onChange={(e) => setPrimaryAdminName(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="First and Last Admin Name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="your-email@email.com"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Phone</label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="555-555-5555"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Alt Phone</label>
-                <input
-                  value={phoneAlt}
-                  onChange={(e) => setPhoneAlt(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Website</label>
-                <input
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="https://artemisnav.tech"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Address Line 1</label>
-                <input
-                  value={addressLine1}
-                  onChange={(e) => setAddressLine1(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="123 Main Street"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Address Line 2</label>
-                <input
-                  value={addressLine2}
-                  onChange={(e) => setAddressLine2(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Address Line 3</label>
-                <input
-                  value={addressLine3}
-                  onChange={(e) => setAddressLine3(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">City</label>
-                <input
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="City Name"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">State / Province</label>
-                <input
-                  value={stateProvince}
-                  onChange={(e) => setStateProvince(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="State / Province 2 letter Abbv."
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Country</label>
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  required
-                >
-                  {countryOptions.map((option) => (
-                    <option key={option.code} value={option.code}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">County</label>
-                <input
-                  value={county}
-                  onChange={(e) => setCounty(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="Optional"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">Formation Date</label>
-                <input
-                  type="date"
-                  value={formationDate}
-                  onChange={(e) => setFormationDate(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-slate-600">EIN</label>
-                <input
-                  value={ein}
-                  onChange={(e) => setEin(e.target.value)}
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
-                  placeholder="12-3456789"
-                  required
-                />
-              </div>
-
-              <div className="md:col-span-2 xl:col-span-3">
+              {/* 
+                --------------------------------------------------------------
+                ACTION BUTTONS
+                --------------------------------------------------------------
+              */}
+              <div className="flex flex-col gap-3 xl:items-end">
                 <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white disabled:opacity-50"
+                  type="button"
+                  onClick={() => setShowCreateFirm((prev) => !prev)}
+                  className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-5 py-3 text-sm font-semibold text-black shadow-[0_0_25px_rgba(212,175,55,0.35)] transition hover:brightness-110"
                 >
-                  {saving ? "Creating..." : "Create Firm"}
+                  {showCreateFirm ? "Close Create Firm" : "Create Firm"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => router.push("/managers/create")}
+                  className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
+                >
+                  Add Fund Admin
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
+                >
+                  Back to Dashboard
                 </button>
               </div>
-            </form>
-          </div>
-        )}
+            </div>
+          </section>
 
-        <div className="rounded-3xl border bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">All Firms</h2>
-            <div className="text-sm text-slate-500">Count: {firms.length}</div>
-          </div>
-
-          {loading ? (
-            <p className="text-sm text-slate-500">Loading firms...</p>
-          ) : firms.length === 0 ? (
-            <p className="text-sm text-slate-500">No firms found yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border-collapse text-sm">
-                <thead>
-                  <tr className="border-b bg-slate-50 text-left">
-                    <th className="px-4 py-3">ID</th>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Primary Admin</th>
-                    <th className="px-4 py-3">Email</th>
-                    <th className="px-4 py-3">Phone</th>
-                    <th className="px-4 py-3">City</th>
-                    <th className="px-4 py-3">State</th>
-                    <th className="px-4 py-3">Country</th>
-                    <th className="px-4 py-3">EIN</th>
-                    <th className="px-4 py-3">Account Number</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {firms.map((firm) => (
-                    <tr key={firm.id} className="border-b last:border-b-0">
-                      <td className="px-4 py-3">{firm.id}</td>
-                      <td className="px-4 py-3 font-medium">{firm.name}</td>
-                      <td className="px-4 py-3">{firm.primary_admin_name || "-"}</td>
-                      <td className="px-4 py-3">{firm.email || "-"}</td>
-                      <td className="px-4 py-3">{firm.phone || "-"}</td>
-                      <td className="px-4 py-3">{firm.city || "-"}</td>
-                      <td className="px-4 py-3">{firm.state_province || "-"}</td>
-                      <td className="px-4 py-3">{firm.country || "-"}</td>
-                      <td className="px-4 py-3">{firm.ein || "-"}</td>
-                      <td className="px-4 py-3">{firm.account_number || "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* 
+            ==================================================================
+            FEEDBACK MESSAGES
+            ==================================================================
+          */}
+          {error && (
+            <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {error}
             </div>
           )}
+
+          {success && (
+            <div className="mt-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+              {success}
+            </div>
+          )}
+
+          {/* 
+            ==================================================================
+            CREATE FIRM PANEL
+            ==================================================================
+          */}
+          {showCreateFirm && (
+            <section className="mt-6 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-[#D4AF37]">
+                    Create New Firm
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-300">
+                    Enter the management company details below to create a new Artemis firm record.
+                  </p>
+                </div>
+
+                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                  New Entity
+                </div>
+              </div>
+
+              <form
+                onSubmit={handleCreateFirm}
+                className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+              >
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Firm Name</label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="Artemis NAV Technologies"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">
+                    Primary Admin Name
+                  </label>
+                  <input
+                    value={primaryAdminName}
+                    onChange={(e) => setPrimaryAdminName(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="First and Last Admin Name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="your-email@email.com"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Phone</label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="555-555-5555"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Alt Phone</label>
+                  <input
+                    value={phoneAlt}
+                    onChange={(e) => setPhoneAlt(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Website</label>
+                  <input
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="https://artemisnav.tech"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Address Line 1</label>
+                  <input
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="123 Main Street"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Address Line 2</label>
+                  <input
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Address Line 3</label>
+                  <input
+                    value={addressLine3}
+                    onChange={(e) => setAddressLine3(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">City</label>
+                  <input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="City Name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">State / Province</label>
+                  <input
+                    value={stateProvince}
+                    onChange={(e) => setStateProvince(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="State / Province"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Country</label>
+                  <select
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]"
+                    required
+                  >
+                    {countryOptions.map((option) => (
+                      <option key={option.code} value={option.code} className="bg-black text-white">
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">County</label>
+                  <input
+                    value={county}
+                    onChange={(e) => setCounty(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">Formation Date</label>
+                  <input
+                    type="date"
+                    value={formationDate}
+                    onChange={(e) => setFormationDate(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none focus:border-[#D4AF37]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-slate-300">EIN</label>
+                  <input
+                    value={ein}
+                    onChange={(e) => setEin(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                    placeholder="12-3456789"
+                    required
+                  />
+                </div>
+
+                <div className="md:col-span-2 xl:col-span-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-6 py-3 text-sm font-semibold text-black shadow-[0_0_25px_rgba(212,175,55,0.35)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {saving ? "Creating..." : "Create Firm"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* 
+            ==================================================================
+            ALL FIRMS TABLE
+            ==================================================================
+          */}
+          <section className="mt-6 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#D4AF37]">All Firms</h2>
+                <p className="mt-1 text-sm text-slate-300">
+                  View all management companies currently loaded into Artemis.
+                </p>
+              </div>
+
+              <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                Count: {firms.length}
+              </div>
+            </div>
+
+            {loading ? (
+              <p className="text-sm text-slate-400">Loading firms...</p>
+            ) : firms.length === 0 ? (
+              <p className="text-sm text-slate-400">No firms found yet.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-2xl border border-white/10">
+                <table className="min-w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 bg-white/[0.04] text-left text-slate-300">
+                      <th className="px-4 py-3 font-medium">ID</th>
+                      <th className="px-4 py-3 font-medium">Name</th>
+                      <th className="px-4 py-3 font-medium">Primary Admin</th>
+                      <th className="px-4 py-3 font-medium">Email</th>
+                      <th className="px-4 py-3 font-medium">Phone</th>
+                      <th className="px-4 py-3 font-medium">City</th>
+                      <th className="px-4 py-3 font-medium">State</th>
+                      <th className="px-4 py-3 font-medium">Country</th>
+                      <th className="px-4 py-3 font-medium">EIN</th>
+                      <th className="px-4 py-3 font-medium">Account Number</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {firms.map((firm) => (
+                      <tr
+                        key={firm.id}
+                        className="border-b border-white/10 last:border-b-0 hover:bg-white/[0.03]"
+                      >
+                        <td className="px-4 py-3 text-slate-300">{firm.id}</td>
+                        <td className="px-4 py-3 font-medium text-[#F1D36B]">{firm.name}</td>
+                        <td className="px-4 py-3 text-slate-300">
+                          {firm.primary_admin_name || "-"}
+                        </td>
+                        <td className="px-4 py-3 text-slate-300">{firm.email || "-"}</td>
+                        <td className="px-4 py-3 text-slate-300">{firm.phone || "-"}</td>
+                        <td className="px-4 py-3 text-slate-300">{firm.city || "-"}</td>
+                        <td className="px-4 py-3 text-slate-300">
+                          {firm.state_province || "-"}
+                        </td>
+                        <td className="px-4 py-3 text-slate-300">{firm.country || "-"}</td>
+                        <td className="px-4 py-3 text-slate-300">{firm.ein || "-"}</td>
+                        <td className="px-4 py-3 text-[#F1D36B]">
+                          {firm.account_number || "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
