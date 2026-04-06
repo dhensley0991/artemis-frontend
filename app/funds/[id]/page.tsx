@@ -340,6 +340,7 @@ export default function FundDetailPage() {
     const management_fee = Number(prompt("Management Fee (%)", "2"));
     const incentive_fee = Number(prompt("Success Fee (%)", "20"));
     const hurdle_rate = Number(prompt("Hurdle Rate (%)", "0"));
+    const high_water_mark = Number(prompt("High Water Mark", "0"));
 
     try {
       const res = await fetch(
@@ -356,6 +357,7 @@ export default function FundDetailPage() {
             management_fee,
             incentive_fee,
             hurdle_rate,
+            high_water_mark,
           }),
         }
       );
