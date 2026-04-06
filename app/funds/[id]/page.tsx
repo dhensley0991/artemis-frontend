@@ -331,49 +331,49 @@ export default function FundDetailPage() {
 
 
   const handleAddShareClass = async () => {
-      const token = localStorage.getItem("artemis_token");
-      if (!token || !fund) return;
+    const token = localStorage.getItem("artemis_token");
+    if (!token || !fund) return;
 
-      const class_name = prompt("Class Name (e.g. Class A)");
-      if (!class_name) return;
+    const class_name = prompt("Class Name (e.g. Class A)");
+    if (!class_name) return;
 
-      const management_fee = Number(prompt("Management Fee (%)", "2"));
-      const incentive_fee = Number(prompt("Success Fee (%)", "20"));
-      const hurdle_rate = Number(prompt("Hurdle Rate (%)", "0"));
+    const management_fee = Number(prompt("Management Fee (%)", "2"));
+    const incentive_fee = Number(prompt("Success Fee (%)", "20"));
+    const hurdle_rate = Number(prompt("Hurdle Rate (%)", "0"));
 
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              fund_id: fund.id,
-              class_name,
-              management_fee,
-              incentive_fee,
-              hurdle_rate,
-            }),
-          }
-        );
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            fund_id: fund.id,
+            class_name,
+            management_fee,
+            incentive_fee,
+            hurdle_rate,
+          }),
+        }
+      );
 
-        if (!res.ok) throw new Error("Failed to create share class");
+      if (!res.ok) throw new Error("Failed to create share class");
 
-        const newClass = await res.json();
+      const newClass = await res.json();
 
-        // 🔥 update UI instantly
-        setShareClasses((prev) => [...prev, newClass]);
+      // 🔥 update UI instantly
+      setShareClasses((prev) => [...prev, newClass]);
 
-        alert("Share class created");
-      } catch (err) {
-        alert("Error creating share class");
-      }
-    };
+      alert("Share class created");
+    } catch (err) {
+      alert("Error creating share class");
+    }
+  };
   if (loading) {
-    
+
     return (
       <main className="min-h-screen bg-black text-white">
         <div className="mx-auto max-w-7xl px-6 py-12">
@@ -817,11 +817,51 @@ export default function FundDetailPage() {
                           key={sc.id}
                           className="rounded-2xl border border-white/10 bg-black/30 p-4"
                         >
-                          <div className="text-lg font-semibold text-white">
-                            {sc.class_name}
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="text-lg font-semibold text-white">{sc.class_name}</div>
+                              <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">
+                                Share Class
+                              </div>
+                            </div>
                           </div>
-                          <div className="mt-1 text-sm text-slate-400">
-                            Mgmt Fee: {sc.management_fee}% | Perf Fee: {sc.incentive_fee}%
+
+                          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                Management Fee
+                              </p>
+                              <p className="mt-1 font-medium text-[#F1D36B]">
+                                {sc.management_fee.toFixed(2)}%
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                Performance Fee
+                              </p>
+                              <p className="mt-1 font-medium text-[#F1D36B]">
+                                {sc.incentive_fee.toFixed(2)}%
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                Hurdle Rate
+                              </p>
+                              <p className="mt-1 font-medium text-[#F1D36B]">
+                                {sc.hurdle_rate.toFixed(2)}%
+                              </p>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                High Water Mark
+                              </p>
+                              <p className="mt-1 font-medium text-[#F1D36B]">
+                                {sc.high_water_mark.toFixed(2)}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       ))}
