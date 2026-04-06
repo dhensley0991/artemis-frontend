@@ -776,7 +776,7 @@ export default function FundDetailPage() {
                           <div key={sc.id} className="rounded-2xl border border-white/10 bg-black/30 p-4">
                             <div className="text-lg font-semibold text-white">{sc.class_name}</div>
                             <div className="text-sm text-slate-400 mt-1">
-                              Mgmt Fee: {sc.management_fee}% | Perf Fee: {sc.performance_fee}%
+                              Mgmt Fee: {sc.management_fee}% | Perf Fee: {sc.incentive_fee}%
                             </div>
                           </div>
                         ))}
