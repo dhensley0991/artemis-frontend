@@ -739,14 +739,6 @@ export default function FundDetailPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
-
-              <section className="xl:col-span-8 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Documents Vault</h2>
-                  <button className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium hover:bg-white/[0.08]">
-                    Upload Document
-                  </button>
-                </div>
                 {/* 🔥 SHARE CLASS PREVIEW (NEW) */}
                 <section className="xl:col-span-12 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
 
@@ -784,6 +776,15 @@ export default function FundDetailPage() {
                     )}
                   </div>
 
+
+              <section className="xl:col-span-8 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Documents Vault</h2>
+                  <button className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium hover:bg-white/[0.08]">
+                    Upload Document
+                  </button>
+                </div>
+              
                 </section>
                 <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-5 text-sm text-slate-300">
