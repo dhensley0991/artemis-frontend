@@ -245,7 +245,7 @@ export default function FirmsPage() {
       setSaving(false);
     }
   };
-
+      
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.05),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(255,255,255,0.03),_transparent_22%),linear-gradient(to_bottom,_#000000,_#090909,_#141414,_#1d1d1d)]">

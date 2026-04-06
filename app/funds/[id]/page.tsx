@@ -329,7 +329,51 @@ export default function FundDetailPage() {
     }
   };
 
+
+  const handleAddShareClass = async () => {
+      const token = localStorage.getItem("artemis_token");
+      if (!token || !fund) return;
+
+      const class_name = prompt("Class Name (e.g. Class A)");
+      if (!class_name) return;
+
+      const management_fee = Number(prompt("Management Fee (%)", "2"));
+      const incentive_fee = Number(prompt("Success Fee (%)", "20"));
+      const hurdle_rate = Number(prompt("Hurdle Rate (%)", "0"));
+
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              fund_id: fund.id,
+              class_name,
+              management_fee,
+              incentive_fee,
+              hurdle_rate,
+            }),
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to create share class");
+
+        const newClass = await res.json();
+
+        // 🔥 update UI instantly
+        setShareClasses((prev) => [...prev, newClass]);
+
+        alert("Share class created");
+      } catch (err) {
+        alert("Error creating share class");
+      }
+    };
   if (loading) {
+    
     return (
       <main className="min-h-screen bg-black text-white">
         <div className="mx-auto max-w-7xl px-6 py-12">
@@ -752,9 +796,13 @@ export default function FundDetailPage() {
                     </p>
                   </div>
 
-                  <button className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2 text-sm font-semibold text-black shadow-md hover:opacity-90">
+                  <button
+                    onClick={handleAddShareClass}
+                    className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2 text-sm font-semibold text-black shadow-md hover:opacity-90"
+                  >
                     Add Share Class
                   </button>
+
                 </div>
 
                 <div className="mt-6">
@@ -824,7 +872,7 @@ export default function FundDetailPage() {
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </div >
+    </main >
   );
 }
