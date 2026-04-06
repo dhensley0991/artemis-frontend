@@ -739,6 +739,7 @@ export default function FundDetailPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
+
               <section className="xl:col-span-8 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Documents Vault</h2>
@@ -746,7 +747,44 @@ export default function FundDetailPage() {
                     Upload Document
                   </button>
                 </div>
+                {/* 🔥 SHARE CLASS PREVIEW (NEW) */}
+                <section className="xl:col-span-12 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-xl">
 
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-[#D4AF37]">
+                        Share Class Preview
+                      </h2>
+                      <p className="mt-1 text-sm text-slate-300">
+                        Manage fee structures and class terms for this fund.
+                      </p>
+                    </div>
+
+                    <button className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2 text-sm font-semibold text-black shadow-md hover:opacity-90">
+                      Add Share Class
+                    </button>
+                  </div>
+
+                  <div className="mt-6">
+                    {shareClasses.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-6 text-sm text-slate-400">
+                        No share classes found for this fund yet.
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {shareClasses.map((sc) => (
+                          <div key={sc.id} className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                            <div className="text-lg font-semibold text-white">{sc.class_name}</div>
+                            <div className="text-sm text-slate-400 mt-1">
+                              Mgmt Fee: {sc.management_fee}% | Perf Fee: {sc.performance_fee}%
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                </section>
                 <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-dashed border-white/15 bg-black/25 p-5 text-sm text-slate-300">
                     Investor Letters
