@@ -214,7 +214,7 @@ export default function AddInvestorPage() {
 
       setTimeout(() => {
         router.push("/investors");
-      }, 900);
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create investor");
     } finally {
