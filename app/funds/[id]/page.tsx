@@ -40,6 +40,16 @@ type Fund = {
   account_number?: string | null;
 };
 
+type ShareClass = {
+  id: number;
+  fund_id: number;
+  class_name: string;
+  management_fee: number;
+  incentive_fee: number;
+  hurdle_rate: number;
+  high_water_mark: number;
+};
+
 type NavPoint = {
   label: string;
   value: number;
@@ -198,6 +208,7 @@ export default function FundDetailPage() {
   const router = useRouter();
 
   const [fund, setFund] = useState<Fund | null>(null);
+  const [shareClasses, setShareClasses] = useState<ShareClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
   const [calcMessage, setCalcMessage] = useState("");
@@ -238,6 +249,20 @@ export default function FundDetailPage() {
         const data: Fund = await res.json();
         setFund(data);
         setNavSnapshot(buildInitialSnapshot(data));
+        // ---------- LOAD SHARE CLASSES ----------
+        const scRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (scRes.ok) {
+          const scData: ShareClass[] = await scRes.json();
+          setShareClasses(scData.filter((sc) => sc.fund_id === data.id));
+        }
       } catch (err) {
         setPageError(err instanceof Error ? err.message : "Failed to load fund");
       } finally {
