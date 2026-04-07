@@ -22,8 +22,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-
-
 /*
   ============================================================================
   TYPES
@@ -205,11 +203,9 @@ const FUND_ID_TOOLTIP =
   ============================================================================
 */
 
-
 export default function FundDetailPage() {
   const params = useParams();
   const router = useRouter();
-  
 
   const [fund, setFund] = useState<Fund | null>(null);
   const [shareClasses, setShareClasses] = useState<ShareClass[]>([]);
@@ -359,7 +355,6 @@ export default function FundDetailPage() {
 
       // close modal
       setShowShareClassModal(false);
-
     } catch (err) {
       alert("Error creating share class");
     } finally {
@@ -414,41 +409,39 @@ export default function FundDetailPage() {
       ==========================================================================
     */
   const handleDeleteShareClass = async (shareClassId: number) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this share class?"
-  );
-  if (!confirmed) return;
-
-  try {
-    const token = localStorage.getItem("artemis_token");
-    if (!token) return;
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes/${shareClassId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this share class?"
     );
+    if (!confirmed) return;
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => null);
-      throw new Error(
-        errorData?.detail || "Failed to delete share class"
+    try {
+      const token = localStorage.getItem("artemis_token");
+      if (!token) return;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes/${shareClassId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.detail || "Failed to delete share class");
+      }
+
+      setShareClasses((prev) => prev.filter((sc) => sc.id !== shareClassId));
+    } catch (err) {
+      alert(
+        err instanceof Error
+          ? err.message
+          : "Error deleting share class"
       );
     }
-
-    setShareClasses((prev) => prev.filter((sc) => sc.id !== shareClassId));
-  } catch (err) {
-    alert(
-      err instanceof Error
-        ? err.message
-        : "Error deleting share class"
-    );
-  }
-};
+  };
 
   const handleAddShareClass = async () => {
     const token = localStorage.getItem("artemis_token");
@@ -461,8 +454,6 @@ export default function FundDetailPage() {
     const incentive_fee = Number(prompt("Success Fee (%)", "20"));
     const hurdle_rate = Number(prompt("Hurdle Rate (%)", "0"));
     const high_water_mark = Number(prompt("High Water Mark (%)", "0"));
-
-
 
     try {
       const res = await fetch(
@@ -496,21 +487,10 @@ export default function FundDetailPage() {
       alert("Error creating share class");
     }
   };
-  if (loading) {
 
+  if (loading) {
     return (
       <main className="min-h-screen bg-black text-white">
-       <button
-  onClick={() =>
-    showToast({
-      title: "Test Toast",
-      message: "If you see this, it's working",
-      variant: "success",
-    })
-  }
->
-  TEST TOAST
-</button> 
         <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="animate-pulse rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
             <div className="h-8 w-64 rounded bg-white/10" />
@@ -937,7 +917,6 @@ export default function FundDetailPage() {
                   >
                     Add Share Class
                   </button>
-
                 </div>
 
                 <div className="mt-6">
@@ -1055,7 +1034,8 @@ export default function FundDetailPage() {
             </div>
           </div>
         </div>
-      </div >
+      </div>
+
       {/* SHARE CLASS MODAL OVERLAY */}
       {showShareClassModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
@@ -1235,7 +1215,6 @@ export default function FundDetailPage() {
           </div>
         </div>
       )}
-    </main >
+    </main>
   );
 }
-
