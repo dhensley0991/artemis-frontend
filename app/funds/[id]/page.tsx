@@ -21,6 +21,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
+
 
 /*
   ============================================================================
@@ -203,9 +205,11 @@ const FUND_ID_TOOLTIP =
   ============================================================================
 */
 
+
 export default function FundDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [fund, setFund] = useState<Fund | null>(null);
   const [shareClasses, setShareClasses] = useState<ShareClass[]>([]);
@@ -458,6 +462,8 @@ export default function FundDetailPage() {
     const hurdle_rate = Number(prompt("Hurdle Rate (%)", "0"));
     const high_water_mark = Number(prompt("High Water Mark (%)", "0"));
 
+
+
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes`,
@@ -494,6 +500,17 @@ export default function FundDetailPage() {
 
     return (
       <main className="min-h-screen bg-black text-white">
+       <button
+  onClick={() =>
+    showToast({
+      title: "Test Toast",
+      message: "If you see this, it's working",
+      variant: "success",
+    })
+  }
+>
+  TEST TOAST
+</button> 
         <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="animate-pulse rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
             <div className="h-8 w-64 rounded bg-white/10" />
@@ -1221,3 +1238,4 @@ export default function FundDetailPage() {
     </main >
   );
 }
+
