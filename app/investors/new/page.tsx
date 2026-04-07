@@ -311,7 +311,7 @@ export default function AddInvestorPage() {
         throw new Error(data?.detail || `Investor create failed: ${res.status}`);
       }
 
-      setSuccess("Investor created successfully.");
+      setSuccess("Investor created successfully and is now pending approval. Go to Pending Approvals to review and open the account.");
 
       setTimeout(() => {
         router.push("/investors");
