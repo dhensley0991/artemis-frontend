@@ -28,6 +28,8 @@ export default function AddInvestorPage() {
 
   const [form, setForm] = useState({
     firm_id: "",
+
+    // primary
     first_name: "",
     last_name: "",
     email: "",
@@ -41,13 +43,45 @@ export default function AddInvestorPage() {
     postal_code: "",
     country: "United States",
     investor_type: "",
+    account_registration_type: "",
     accreditation_status: "",
     notes: "",
+
+    // joint
+    joint_first_name: "",
+    joint_last_name: "",
+    joint_email: "",
+    joint_phone: "",
+    joint_ssn: "",
+    joint_date_of_birth: "",
+    joint_address_line_1: "",
+    joint_address_line_2: "",
+    joint_city: "",
+    joint_state_province: "",
+    joint_postal_code: "",
+    joint_country: "United States",
+    joint_accreditation_status: "",
+    joint_notes: "",
+
+    // entity / family office
+    entity_name: "",
+    entity_type: "",
+    entity_ein: "",
+    entity_address_line_1: "",
+    entity_address_line_2: "",
+    entity_city: "",
+    entity_state_province: "",
+    entity_postal_code: "",
+    entity_country: "United States",
+    entity_contact_first_name: "",
+    entity_contact_last_name: "",
+    entity_contact_email: "",
+    entity_contact_phone: "",
+    entity_notes: "",
   });
 
   useEffect(() => {
     const token = localStorage.getItem("artemis_token");
-    console.log("TOKEN:", token);
 
     if (!token) {
       router.push("/login");
@@ -130,13 +164,15 @@ export default function AddInvestorPage() {
 
       if (data.exists) {
         setDuplicateWarning(
-          `Investor already exists in this firm${data.investor_name ? `: ${data.investor_name}` : ""}. Open the existing investor record and add a new fund/account relationship instead.`
+          `Investor already exists in this firm${
+            data.investor_name ? `: ${data.investor_name}` : ""
+          }. Open the existing investor record and add a new fund/account relationship instead.`
         );
       } else {
         setDuplicateWarning("");
       }
     } catch {
-      // silently ignore duplicate check fetch issues for now
+      // ignore duplicate check fetch issues for now
     }
   };
 
@@ -171,6 +207,29 @@ export default function AddInvestorPage() {
       return;
     }
 
+    if (form.investor_type === "joint") {
+      if (!form.joint_first_name.trim()) {
+        setError("Joint first name is required.");
+        return;
+      }
+
+      if (!form.joint_last_name.trim()) {
+        setError("Joint last name is required.");
+        return;
+      }
+    }
+
+    if (
+      form.investor_type === "entity" ||
+      form.investor_type === "family_office" ||
+      form.investor_type === "trust"
+    ) {
+      if (!form.entity_name.trim()) {
+        setError("Entity name is required.");
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError("");
@@ -178,6 +237,8 @@ export default function AddInvestorPage() {
 
       const payload = {
         firm_id: Number(form.firm_id),
+
+        // primary
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         email: form.email.trim() || null,
@@ -191,8 +252,48 @@ export default function AddInvestorPage() {
         postal_code: form.postal_code.trim() || null,
         country: form.country.trim() || null,
         investor_type: form.investor_type || null,
+        account_registration_type: form.investor_type || null,
         accreditation_status: form.accreditation_status || null,
         notes: form.notes.trim() || null,
+
+        // joint
+        joint_first_name: form.joint_first_name.trim() || null,
+        joint_last_name: form.joint_last_name.trim() || null,
+        joint_email: form.joint_email.trim() || null,
+        joint_phone: form.joint_phone.trim() || null,
+        joint_ssn: form.joint_ssn.trim() || null,
+        joint_date_of_birth: form.joint_date_of_birth || null,
+        joint_address_line_1: form.joint_address_line_1.trim() || null,
+        joint_address_line_2: form.joint_address_line_2.trim() || null,
+        joint_city: form.joint_city.trim() || null,
+        joint_state_province: form.joint_state_province.trim() || null,
+        joint_postal_code: form.joint_postal_code.trim() || null,
+        joint_country: form.joint_country.trim() || null,
+        joint_accreditation_status: form.joint_accreditation_status || null,
+        joint_notes: form.joint_notes.trim() || null,
+
+        // entity / family office
+        entity_name: form.entity_name.trim() || null,
+        entity_type:
+          form.investor_type === "entity"
+            ? "entity"
+            : form.investor_type === "family_office"
+            ? "family_office"
+            : form.investor_type === "trust"
+            ? "trust"
+            : null,
+        entity_ein: form.entity_ein.trim() || null,
+        entity_address_line_1: form.entity_address_line_1.trim() || null,
+        entity_address_line_2: form.entity_address_line_2.trim() || null,
+        entity_city: form.entity_city.trim() || null,
+        entity_state_province: form.entity_state_province.trim() || null,
+        entity_postal_code: form.entity_postal_code.trim() || null,
+        entity_country: form.entity_country.trim() || null,
+        entity_contact_first_name: form.entity_contact_first_name.trim() || null,
+        entity_contact_last_name: form.entity_contact_last_name.trim() || null,
+        entity_contact_email: form.entity_contact_email.trim() || null,
+        entity_contact_phone: form.entity_contact_phone.trim() || null,
+        entity_notes: form.entity_notes.trim() || null,
       };
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/investors`, {
@@ -416,7 +517,7 @@ export default function AddInvestorPage() {
                     <option value="joint">Joint</option>
                     <option value="trust">Trust</option>
                     <option value="entity">Entity</option>
-                    <option value="ira">IRA</option>
+                    <option value="family_office">Family Office</option>
                   </select>
                 </div>
 
@@ -512,6 +613,373 @@ export default function AddInvestorPage() {
                   />
                 </div>
               </div>
+
+              {form.investor_type === "joint" && (
+                <div className="mt-6 rounded-[24px] border border-white/10 bg-black/20 p-5">
+                  <h3 className="text-lg font-semibold text-[#D4AF37]">Joint Owner Details</h3>
+                  <p className="mt-2 text-sm text-slate-400">
+                    Complete the secondary owner information. This will be stored under one account.
+                  </p>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint First Name <span className="text-red-300">*</span>
+                      </label>
+                      <input
+                        name="joint_first_name"
+                        value={form.joint_first_name}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Last Name <span className="text-red-300">*</span>
+                      </label>
+                      <input
+                        name="joint_last_name"
+                        value={form.joint_last_name}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Email
+                      </label>
+                      <input
+                        name="joint_email"
+                        type="email"
+                        value={form.joint_email}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Phone
+                      </label>
+                      <input
+                        name="joint_phone"
+                        value={form.joint_phone}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint SSN
+                      </label>
+                      <input
+                        name="joint_ssn"
+                        value={form.joint_ssn}
+                        onChange={handleChange}
+                        placeholder="123-45-6789"
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Date of Birth
+                      </label>
+                      <input
+                        name="joint_date_of_birth"
+                        type="date"
+                        value={form.joint_date_of_birth}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Address Line 1
+                      </label>
+                      <input
+                        name="joint_address_line_1"
+                        value={form.joint_address_line_1}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Address Line 2
+                      </label>
+                      <input
+                        name="joint_address_line_2"
+                        value={form.joint_address_line_2}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint City
+                      </label>
+                      <input
+                        name="joint_city"
+                        value={form.joint_city}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint State / Province
+                      </label>
+                      <input
+                        name="joint_state_province"
+                        value={form.joint_state_province}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Postal Code
+                      </label>
+                      <input
+                        name="joint_postal_code"
+                        value={form.joint_postal_code}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Country
+                      </label>
+                      <input
+                        name="joint_country"
+                        value={form.joint_country}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Accreditation Status
+                      </label>
+                      <select
+                        name="joint_accreditation_status"
+                        value={form.joint_accreditation_status}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      >
+                        <option value="">Select status</option>
+                        <option value="accredited">Accredited</option>
+                        <option value="non-accredited">Non-Accredited</option>
+                        <option value="qualified-purchaser">Qualified Purchaser</option>
+                        <option value="pending-review">Pending Review</option>
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Joint Notes
+                      </label>
+                      <textarea
+                        name="joint_notes"
+                        value={form.joint_notes}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(form.investor_type === "entity" ||
+                form.investor_type === "family_office" ||
+                form.investor_type === "trust") && (
+                <div className="mt-6 rounded-[24px] border border-white/10 bg-black/20 p-5">
+                  <h3 className="text-lg font-semibold text-[#D4AF37]">
+                    {form.investor_type === "family_office"
+                      ? "Family Office Details"
+                      : form.investor_type === "trust"
+                      ? "Trust Details"
+                      : "Entity Details"}
+                  </h3>
+
+                  <p className="mt-2 text-sm text-slate-400">
+                    Complete the registration details for this ownership structure.
+                  </p>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity Name <span className="text-red-300">*</span>
+                      </label>
+                      <input
+                        name="entity_name"
+                        value={form.entity_name}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        EIN
+                      </label>
+                      <input
+                        name="entity_ein"
+                        value={form.entity_ein}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Contact First Name
+                      </label>
+                      <input
+                        name="entity_contact_first_name"
+                        value={form.entity_contact_first_name}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Contact Last Name
+                      </label>
+                      <input
+                        name="entity_contact_last_name"
+                        value={form.entity_contact_last_name}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Contact Email
+                      </label>
+                      <input
+                        name="entity_contact_email"
+                        type="email"
+                        value={form.entity_contact_email}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Contact Phone
+                      </label>
+                      <input
+                        name="entity_contact_phone"
+                        value={form.entity_contact_phone}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity Address Line 1
+                      </label>
+                      <input
+                        name="entity_address_line_1"
+                        value={form.entity_address_line_1}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity Address Line 2
+                      </label>
+                      <input
+                        name="entity_address_line_2"
+                        value={form.entity_address_line_2}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity City
+                      </label>
+                      <input
+                        name="entity_city"
+                        value={form.entity_city}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity State / Province
+                      </label>
+                      <input
+                        name="entity_state_province"
+                        value={form.entity_state_province}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity Postal Code
+                      </label>
+                      <input
+                        name="entity_postal_code"
+                        value={form.entity_postal_code}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity Country
+                      </label>
+                      <input
+                        name="entity_country"
+                        value={form.entity_country}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
+                        Entity Notes
+                      </label>
+                      <textarea
+                        name="entity_notes"
+                        value={form.entity_notes}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none focus:border-[#D4AF37]/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6">
                 <label className="mb-2 block text-xs uppercase tracking-[0.18em] text-slate-400">
