@@ -404,6 +404,38 @@ export default function FundDetailPage() {
     }
   };
 
+  /*
+      ==========================================================================
+      Delete Share Class
+      ==========================================================================
+    */
+  const handleDeleteShareClass = async (shareClassId: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this share class?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("artemis_token");
+      if (!token) return;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes/${shareClassId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to delete share class");
+
+      setShareClasses((prev) => prev.filter((sc) => sc.id !== shareClassId));
+    } catch {
+      alert("Error deleting share class");
+    }
+  };
 
   const handleAddShareClass = async () => {
     const token = localStorage.getItem("artemis_token");
@@ -901,6 +933,14 @@ export default function FundDetailPage() {
                                 Share Class
                               </div>
                             </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteShareClass(sc.id)}
+                              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-500/20"
+                            >
+                              Delete
+                            </button>
                           </div>
 
                           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
