@@ -264,6 +264,13 @@ export default function InvestorsPage() {
               </button>
 
               <button
+                onClick={() => router.push("/investors/pending")}
+                className="rounded-2xl border border-[#D4AF37]/30 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#F1D36B] transition hover:bg-white/[0.06]"
+              >
+                Pending Approvals
+              </button>
+
+              <button
                 onClick={() => router.push("/")}
                 className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-sm font-medium text-white transition hover:bg-white/[0.06]"
               >
