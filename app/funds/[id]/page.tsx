@@ -21,7 +21,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useToast } from "@/components/ToastProvider";
+
 
 
 /*
@@ -209,7 +209,7 @@ const FUND_ID_TOOLTIP =
 export default function FundDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { showToast } = useToast();
+  
 
   const [fund, setFund] = useState<Fund | null>(null);
   const [shareClasses, setShareClasses] = useState<ShareClass[]>([]);
