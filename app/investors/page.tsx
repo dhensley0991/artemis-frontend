@@ -11,16 +11,16 @@ type InvestorReportRow = {
   investor_email: string | null;
   investor_phone: string | null;
   investor_address:
-    | {
-        address_line_1: string | null;
-        address_line_2: string | null;
-        city: string | null;
-        state_province: string | null;
-        county: string | null;
-        postal_code: string | null;
-        country: string | null;
-      }
-    | null;
+  | {
+    address_line_1: string | null;
+    address_line_2: string | null;
+    city: string | null;
+    state_province: string | null;
+    county: string | null;
+    postal_code: string | null;
+    country: string | null;
+  }
+  | null;
   investor_since: string | null;
   fund_name: string | null;
   fund_id: string | null;
@@ -57,14 +57,14 @@ function formatDate(value: string | null | undefined) {
 function buildAddress(
   address:
     | {
-        address_line_1: string | null;
-        address_line_2: string | null;
-        city: string | null;
-        state_province: string | null;
-        county: string | null;
-        postal_code: string | null;
-        country: string | null;
-      }
+      address_line_1: string | null;
+      address_line_2: string | null;
+      city: string | null;
+      state_province: string | null;
+      county: string | null;
+      postal_code: string | null;
+      country: string | null;
+    }
     | null
     | undefined
 ) {
@@ -79,6 +79,73 @@ function buildAddress(
 
   const parts = [line1, line2, locality, country].filter(Boolean);
   return parts.length ? parts.join(" • ") : "-";
+}
+
+function escapeCsv(value: unknown) {
+  const str = String(value ?? "");
+  if (str.includes('"') || str.includes(",") || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function downloadCsv(rows: InvestorReportRow[]) {
+  const headers = [
+    "Investor",
+    "Account Number",
+    "Fund",
+    "Fund ID",
+    "Share Class",
+    "Investor Since",
+    "Email",
+    "Phone",
+    "Address",
+    "Subscribed",
+    "Opening Balance",
+    "Closing Balance",
+    "Current Value",
+    "Units Owned",
+    "Fees Paid",
+    "Performance Dollar",
+    "Performance Percent",
+  ];
+
+  const csvRows = rows.map((row) => [
+    row.investor_name || "",
+    row.investor_account_number || "",
+    row.fund_name || "",
+    row.fund_id || "",
+    row.share_class || "",
+    formatDate(row.investor_since),
+    row.investor_email || "",
+    row.investor_phone || "",
+    buildAddress(row.investor_address),
+    row.total_subscribed ?? 0,
+    row.opening_balance ?? 0,
+    row.closing_balance ?? 0,
+    row.current_value ?? 0,
+    row.units_owned ?? 0,
+    row.fees_paid ?? 0,
+    row.performance_dollar ?? 0,
+    row.performance_percent ?? 0,
+  ]);
+
+  const csvContent = [
+    headers.map(escapeCsv).join(","),
+    ...csvRows.map((r) => r.map(escapeCsv).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = window.URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "artemis-investor-report.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  window.URL.revokeObjectURL(url);
 }
 
 export default function InvestorsPage() {
@@ -203,9 +270,9 @@ export default function InvestorsPage() {
     const avgPerformance =
       totalInvestors > 0
         ? filteredRows.reduce(
-            (sum, row) => sum + (row.performance_percent || 0),
-            0
-          ) / totalInvestors
+          (sum, row) => sum + (row.performance_percent || 0),
+          0
+        ) / totalInvestors
         : 0;
 
     return {
@@ -408,8 +475,17 @@ export default function InvestorsPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300">
-              Rows: <span className="text-[#F1D36B]">{filteredRows.length}</span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => downloadCsv(filteredRows)}
+                className="rounded-2xl border border-[#D4AF37]/30 bg-white/[0.03] px-4 py-2 text-sm font-medium text-[#F1D36B] transition hover:bg-white/[0.06]"
+              >
+                Download CSV
+              </button>
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-slate-300">
+                Rows: <span className="text-[#F1D36B]">{filteredRows.length}</span>
+              </div>
             </div>
           </div>
 
@@ -536,16 +612,14 @@ export default function InvestorsPage() {
                           {formatMoney(row.fees_paid)}
                         </td>
                         <td
-                          className={`px-4 py-3 font-medium ${
-                            isPositive ? "text-emerald-300" : "text-red-300"
-                          }`}
+                          className={`px-4 py-3 font-medium ${isPositive ? "text-emerald-300" : "text-red-300"
+                            }`}
                         >
                           {formatMoney(row.performance_dollar)}
                         </td>
                         <td
-                          className={`px-4 py-3 font-medium ${
-                            isPositive ? "text-emerald-300" : "text-red-300"
-                          }`}
+                          className={`px-4 py-3 font-medium ${isPositive ? "text-emerald-300" : "text-red-300"
+                            }`}
                         >
                           {formatPercent(row.performance_percent)}
                         </td>
