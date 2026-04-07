@@ -214,6 +214,29 @@ export default function FundDetailPage() {
   const [calcMessage, setCalcMessage] = useState("");
   const [isCalculating, setIsCalculating] = useState(false);
   const [navSnapshot, setNavSnapshot] = useState<NavSnapshot | null>(null);
+  const [showShareClassModal, setShowShareClassModal] = useState(false);
+  const [savingShareClass, setSavingShareClass] = useState(false);
+
+  const [shareClassForm, setShareClassForm] = useState({
+    class_name: "",
+    management_fee: "",
+    incentive_fee: "",
+    hurdle_rate: "",
+    high_water_mark: "",
+  });
+
+  const SHARE_CLASS_FIELD_HELP = {
+    class_name:
+      "The name of this share class within the fund. Example: Class A, Founder Class, or Institutional Class.",
+    management_fee:
+      "Annual fee charged as a percentage of assets under management. Example: 2.00% on $1,000,000 = $20,000 per year.",
+    incentive_fee:
+      "Performance-based fee charged on profits, usually above certain conditions. Example: 20% of a $100,000 profit = $20,000.",
+    hurdle_rate:
+      "Minimum return required before performance fees apply. This is typically the Risk Free ROR. Example: with a 5.00% hurdle, the fund must exceed 5.00% before performance fees begin.",
+    high_water_mark:
+      "The highest historical NAV previously achieved. Performance fees should only apply on gains above that prior peak.",
+  };
 
   /*
     ==========================================================================
@@ -287,6 +310,58 @@ export default function FundDetailPage() {
   const chartPath = useMemo(() => {
     return buildChartPath(navSeries, 520, 220);
   }, [navSeries]);
+
+  const handleCreateShareClass = async () => {
+    try {
+      setSavingShareClass(true);
+
+      const token = localStorage.getItem("artemis_token");
+      if (!token || !fund) return;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            fund_id: fund.id,
+            class_name: shareClassForm.class_name,
+            management_fee: Number(shareClassForm.management_fee),
+            incentive_fee: Number(shareClassForm.incentive_fee),
+            hurdle_rate: Number(shareClassForm.hurdle_rate),
+            high_water_mark: Number(shareClassForm.high_water_mark),
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to create share class");
+
+      const newClass = await res.json();
+
+      // 🔥 update UI instantly
+      setShareClasses((prev) => [...prev, newClass]);
+
+      // reset form
+      setShareClassForm({
+        class_name: "",
+        management_fee: "",
+        incentive_fee: "",
+        hurdle_rate: "",
+        high_water_mark: "",
+      });
+
+      // close modal
+      setShowShareClassModal(false);
+
+    } catch (err) {
+      alert("Error creating share class");
+    } finally {
+      setSavingShareClass(false);
+    }
+  };
 
   /*
     ==========================================================================
@@ -799,7 +874,7 @@ export default function FundDetailPage() {
                   </div>
 
                   <button
-                    onClick={handleAddShareClass}
+                    onClick={() => setShowShareClassModal(true)}
                     className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2 text-sm font-semibold text-black shadow-md hover:opacity-90"
                   >
                     Add Share Class
@@ -915,6 +990,185 @@ export default function FundDetailPage() {
           </div>
         </div>
       </div >
+      {/* SHARE CLASS MODAL OVERLAY */}
+      {showShareClassModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[#111111] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#D4AF37]">
+                  Add Share Class
+                </h2>
+                <p className="mt-1 text-sm text-slate-300">
+                  Create a new share class for this fund.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowShareClassModal(false)}
+                className="rounded-xl border border-white/15 bg-white/[0.04] px-3 py-2 text-sm text-white hover:bg-white/[0.08]"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <label className="text-sm text-slate-300">Class Name</label>
+                  <div className="group relative cursor-pointer">
+                    <span className="rounded-full border border-[#D4AF37] px-1 text-[10px] text-[#D4AF37]">
+                      i
+                    </span>
+                    <div className="pointer-events-none absolute bottom-6 left-1/2 z-50 w-64 -translate-x-1/2 rounded-lg border border-white/15 bg-black p-2 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {SHARE_CLASS_FIELD_HELP.class_name}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  value={shareClassForm.class_name}
+                  onChange={(e) =>
+                    setShareClassForm((prev) => ({
+                      ...prev,
+                      class_name: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                  placeholder="e.g. Class A"
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <label className="text-sm text-slate-300">Management Fee (%)</label>
+                  <div className="group relative cursor-pointer">
+                    <span className="rounded-full border border-[#D4AF37] px-1 text-[10px] text-[#D4AF37]">
+                      i
+                    </span>
+                    <div className="pointer-events-none absolute bottom-6 left-1/2 z-50 w-64 -translate-x-1/2 rounded-lg border border-white/15 bg-black p-2 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {SHARE_CLASS_FIELD_HELP.management_fee}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={shareClassForm.management_fee}
+                  onChange={(e) =>
+                    setShareClassForm((prev) => ({
+                      ...prev,
+                      management_fee: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                  placeholder="2.00"
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <label className="text-sm text-slate-300">Performance Fee (%)</label>
+                  <div className="group relative cursor-pointer">
+                    <span className="rounded-full border border-[#D4AF37] px-1 text-[10px] text-[#D4AF37]">
+                      i
+                    </span>
+                    <div className="pointer-events-none absolute bottom-6 left-1/2 z-50 w-64 -translate-x-1/2 rounded-lg border border-white/15 bg-black p-2 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {SHARE_CLASS_FIELD_HELP.incentive_fee}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={shareClassForm.incentive_fee}
+                  onChange={(e) =>
+                    setShareClassForm((prev) => ({
+                      ...prev,
+                      incentive_fee: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                  placeholder="20.00"
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <label className="text-sm text-slate-300">Hurdle Rate (%)</label>
+                  <div className="group relative cursor-pointer">
+                    <span className="rounded-full border border-[#D4AF37] px-1 text-[10px] text-[#D4AF37]">
+                      i
+                    </span>
+                    <div className="pointer-events-none absolute bottom-6 left-1/2 z-50 w-64 -translate-x-1/2 rounded-lg border border-white/15 bg-black p-2 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {SHARE_CLASS_FIELD_HELP.hurdle_rate}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={shareClassForm.hurdle_rate}
+                  onChange={(e) =>
+                    setShareClassForm((prev) => ({
+                      ...prev,
+                      hurdle_rate: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <div className="mb-2 flex items-center gap-2">
+                  <label className="text-sm text-slate-300">High Water Mark</label>
+                  <div className="group relative cursor-pointer">
+                    <span className="rounded-full border border-[#D4AF37] px-1 text-[10px] text-[#D4AF37]">
+                      i
+                    </span>
+                    <div className="pointer-events-none absolute bottom-6 left-1/2 z-50 w-72 -translate-x-1/2 rounded-lg border border-white/15 bg-black p-2 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                      {SHARE_CLASS_FIELD_HELP.high_water_mark}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={shareClassForm.high_water_mark}
+                  onChange={(e) =>
+                    setShareClassForm((prev) => ({
+                      ...prev,
+                      high_water_mark: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-white outline-none placeholder:text-slate-500 focus:border-[#D4AF37]"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowShareClassModal(false)}
+                className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white hover:bg-white/[0.08]"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCreateShareClass}
+                className="rounded-2xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2"
+              >
+                Create Share Class
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main >
   );
 }
