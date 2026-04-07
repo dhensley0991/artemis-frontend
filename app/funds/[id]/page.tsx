@@ -410,32 +410,41 @@ export default function FundDetailPage() {
       ==========================================================================
     */
   const handleDeleteShareClass = async (shareClassId: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this share class?"
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this share class?"
+  );
+  if (!confirmed) return;
+
+  try {
+    const token = localStorage.getItem("artemis_token");
+    if (!token) return;
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes/${shareClassId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-    if (!confirmed) return;
 
-    try {
-      const token = localStorage.getItem("artemis_token");
-      if (!token) return;
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/share-classes/${shareClassId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(
+        errorData?.detail || "Failed to delete share class"
       );
-
-      if (!res.ok) throw new Error("Failed to delete share class");
-
-      setShareClasses((prev) => prev.filter((sc) => sc.id !== shareClassId));
-    } catch {
-      alert("Error deleting share class");
     }
-  };
+
+    setShareClasses((prev) => prev.filter((sc) => sc.id !== shareClassId));
+  } catch (err) {
+    alert(
+      err instanceof Error
+        ? err.message
+        : "Error deleting share class"
+    );
+  }
+};CDATASection.apply
 
   const handleAddShareClass = async () => {
     const token = localStorage.getItem("artemis_token");
