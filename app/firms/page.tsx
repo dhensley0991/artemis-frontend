@@ -679,7 +679,18 @@ export default function FirmsPage() {
                         className="border-b border-white/10 last:border-b-0 hover:bg-white/[0.03]"
                       >
                         <td className="px-4 py-3 text-slate-300">{firm.id}</td>
-                        <td className="px-4 py-3 font-medium text-[#F1D36B]">{firm.name}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            {firm.portal_logo_url ? (
+                              <img
+                                src={firm.portal_logo_url}
+                                alt={`${firm.name} logo`}
+                                className="h-8 w-8 rounded object-contain border border-white/10 bg-white/5 p-1"
+                              />
+                            ) : null}
+                            <span className="font-medium text-[#F1D36B]">{firm.name}</span>
+                          </div>
+                        </td>
                         <td className="px-4 py-3 text-slate-300">
                           {firm.primary_admin_name || "-"}
                         </td>
