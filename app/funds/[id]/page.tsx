@@ -209,8 +209,6 @@ export default function FundDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
-  const [portalLogoFile, setPortalLogoFile] = useState<File | null>(null);
-  const [documentLogoFile, setDocumentLogoFile] = useState<File | null>(null);
 
   const [fund, setFund] = useState<Fund | null>(null);
   const [shareClasses, setShareClasses] = useState<ShareClass[]>([]);
