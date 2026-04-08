@@ -22,7 +22,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+
 
 /*
   ============================================================================
@@ -208,6 +208,9 @@ const FUND_ID_TOOLTIP =
 export default function FundDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+  const [portalLogoFile, setPortalLogoFile] = useState<File | null>(null);
+  const [documentLogoFile, setDocumentLogoFile] = useState<File | null>(null);
 
   const [fund, setFund] = useState<Fund | null>(null);
   const [shareClasses, setShareClasses] = useState<ShareClass[]>([]);
