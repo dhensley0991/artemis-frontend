@@ -634,7 +634,7 @@ export default function FundDetailPage() {
                   >
                     Generate Prospect Link
                   </button>
-                  
+                
                   <button
                     onClick={handleCalculateNav}
                     disabled={isCalculating}
