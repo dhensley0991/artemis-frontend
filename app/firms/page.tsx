@@ -20,6 +20,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+
 /*
   ============================================================================
   TYPES
@@ -329,6 +331,14 @@ export default function FirmsPage() {
                   className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
                 >
                   Add Fund Admin
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowWhiteLabelModal(true)}
+                  className="rounded-2xl border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:bg-white/[0.08]"
+                >
+                  Upload White Label Media
                 </button>
 
                 <button

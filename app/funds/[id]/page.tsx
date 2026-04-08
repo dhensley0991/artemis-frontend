@@ -22,6 +22,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+
 /*
   ============================================================================
   TYPES
@@ -634,7 +636,15 @@ export default function FundDetailPage() {
                   >
                     Generate Prospect Link
                   </button>
-                
+
+                  <button
+                    type="button"
+                    onClick={() => setShowWhiteLabelModal(true)}
+                    className="rounded-2xl border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-medium text-white transition hover:bg-white/[0.08]"
+                  >
+                    Upload Fund White Label Media
+                  </button>
+
                   <button
                     onClick={handleCalculateNav}
                     disabled={isCalculating}
