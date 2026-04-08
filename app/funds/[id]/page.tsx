@@ -1251,14 +1251,24 @@ export default function FundDetailPage() {
                 <label className="block text-sm text-slate-300 mb-2">
                   Portal Logo (Transparent PNG)
                 </label>
-                <input type="file" className="w-full text-sm text-white" />
+                <input
+                  type="file"
+                  accept="image/png,image/svg+xml,image/webp,image/jpeg"
+                  onChange={(e) => setPortalLogoFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-white"
+                />
               </div>
 
               <div>
                 <label className="block text-sm text-slate-300 mb-2">
                   Document Logo (Statements / Letters)
                 </label>
-                <input type="file" className="w-full text-sm text-white" />
+                <input
+                  type="file"
+                  accept="image/png,image/svg+xml,image/webp,image/jpeg"
+                  onChange={(e) => setDocumentLogoFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-white"
+                />
               </div>
 
             </div>
