@@ -628,7 +628,18 @@ export default function FundDetailPage() {
                   >
                     ← Back to Funds
                   </button>
-
+                  <button
+                    type="button"
+                    className="rounded-2xl border border-[#D4AF37]/30 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#F1D36B] transition hover:bg-white/[0.06]"
+                  >
+                    Generate Prospect Link
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-2xl border border-[#D4AF37]/30 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#F1D36B] transition hover:bg-white/[0.06]"
+                  >
+                    Generate Prospect Email
+                  </button>
                   <button
                     onClick={handleCalculateNav}
                     disabled={isCalculating}
