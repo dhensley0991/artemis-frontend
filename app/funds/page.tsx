@@ -61,6 +61,9 @@ const countryOptions = [
 ];
 
 export default function FundsPage() {
+  const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+  const [portalLogoFile, setPortalLogoFile] = useState<File | null>(null);
+  const [documentLogoFile, setDocumentLogoFile] = useState<File | null>(null);
   const router = useRouter();
 
   const [funds, setFunds] = useState<Fund[]>([]);
