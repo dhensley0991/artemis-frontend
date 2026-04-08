@@ -40,6 +40,8 @@ type Fund = {
   domicile_country: string;
   firm_id: number;
   account_number?: string | null;
+  fund_portal_logo_url?: string | null;
+  fund_document_logo_url?: string | null;
 };
 
 type ShareClass = {
@@ -568,9 +570,25 @@ export default function FundDetailPage() {
                   </div>
 
                   <div>
-                    <h1 className="bg-gradient-to-r from-[#F1D36B] via-[#D4AF37] to-[#B8962E] bg-clip-text text-4xl font-semibold tracking-tight text-transparent">
-                      {fund.name}
-                    </h1>
+                    <div className="flex items-center gap-4">
+                      {fund.fund_portal_logo_url && (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${fund.fund_portal_logo_url}`}
+                          className="h-10 w-10 object-contain"
+                        />
+                      )}
+
+                      <h1 className="bg-gradient-to-r from-[#F1D36B] via-[#D4AF37] to-[#B8962E] bg-clip-text text-transparent">
+                        {fund.name}
+                      </h1>
+
+                      {fund.fund_document_logo_url && (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${fund.fund_document_logo_url}`}
+                          className="h-8 w-8 object-contain opacity-70"
+                        />
+                      )}
+                    </div>
                     <p className="mt-2 max-w-2xl text-sm text-slate-300">
                       High-visibility fund intelligence page with NAV monitoring,
                       operational data, and workflow controls in one institutional view.
