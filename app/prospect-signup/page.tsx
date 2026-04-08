@@ -1,9 +1,10 @@
 "use client";
 
+export const dynamic = "force-dynamic";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-export const dynamic = "force-dynamic";
+
 
 type PublicFundIntake = {
   fund_id: number;
