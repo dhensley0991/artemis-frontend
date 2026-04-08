@@ -20,10 +20,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
-
-const [portalLogoFile, setPortalLogoFile] = useState<File | null>(null);
-const [documentLogoFile, setDocumentLogoFile] = useState<File | null>(null);
 
 /*
   ============================================================================
@@ -78,6 +74,11 @@ const countryOptions = [
 
 export default function FirmsPage() {
   const router = useRouter();
+  const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+
+  const [portalLogoFile, setPortalLogoFile] = useState<File | null>(null);
+  const [documentLogoFile, setDocumentLogoFile] = useState<File | null>(null);
+
 
   /*
     --------------------------------------------------------------------------
