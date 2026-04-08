@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type ProspectFundConfig = {
@@ -25,7 +25,7 @@ type DuplicateCheckResponse = {
   investor_name?: string;
 };
 
-export default function ProspectSignupPage() {
+function ProspectSignupInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -39,7 +39,6 @@ export default function ProspectSignupPage() {
   const [fundConfig, setFundConfig] = useState<ProspectFundConfig | null>(null);
 
   const [form, setForm] = useState({
-    // primary
     first_name: "",
     last_name: "",
     email: "",
@@ -56,7 +55,6 @@ export default function ProspectSignupPage() {
     accreditation_status: "",
     notes: "",
 
-    // joint
     joint_first_name: "",
     joint_last_name: "",
     joint_email: "",
@@ -72,7 +70,6 @@ export default function ProspectSignupPage() {
     joint_accreditation_status: "",
     joint_notes: "",
 
-    // entity / family office / trust
     entity_name: "",
     entity_ein: "",
     entity_address_line_1: "",
@@ -201,9 +198,7 @@ export default function ProspectSignupPage() {
       } else {
         setDuplicateWarning("");
       }
-    } catch {
-      // ignore duplicate check failures for now
-    }
+    } catch {}
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -870,5 +865,19 @@ export default function ProspectSignupPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ProspectSignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          Loading prospect signup...
+        </div>
+      }
+    >
+      <ProspectSignupInner />
+    </Suspense>
   );
 }
