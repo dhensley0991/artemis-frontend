@@ -218,7 +218,8 @@ export default function FundDetailPage() {
   const [navSnapshot, setNavSnapshot] = useState<NavSnapshot | null>(null);
   const [showShareClassModal, setShowShareClassModal] = useState(false);
   const [savingShareClass, setSavingShareClass] = useState(false);
-
+  const [portalLogoFile, setPortalLogoFile] = useState<File | null>(null);
+  const [documentLogoFile, setDocumentLogoFile] = useState<File | null>(null);
   const [shareClassForm, setShareClassForm] = useState({
     class_name: "",
     management_fee: "",
@@ -1231,6 +1232,88 @@ export default function FundDetailPage() {
           </div>
         </div>
       )}
+      {showWhiteLabelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-black p-6 shadow-2xl">
+
+            <h2 className="text-xl font-semibold text-[#D4AF37]">
+              Upload White Label Media
+            </h2>
+
+            <p className="mt-2 text-sm text-slate-300">
+              Upload logos for client-facing portal and documents.
+            </p>
+
+            <div className="mt-6 space-y-4">
+
+              <div>
+                <label className="block text-sm text-slate-300 mb-2">
+                  Portal Logo (Transparent PNG)
+                </label>
+                <input type="file" className="w-full text-sm text-white" />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-300 mb-2">
+                  Document Logo (Statements / Letters)
+                </label>
+                <input type="file" className="w-full text-sm text-white" />
+              </div>
+
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowWhiteLabelModal(false)}
+                className="rounded-xl border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  const token = localStorage.getItem("artemis_token");
+                  if (!token) return;
+
+                  const formData = new FormData();
+
+                  if (portalLogoFile) {
+                    formData.append("portal_logo", portalLogoFile);
+                  }
+
+                  if (documentLogoFile) {
+                    formData.append("document_logo", documentLogoFile);
+                  }
+
+                  const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/upload-white-label`,
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: formData,
+                    }
+                  );
+
+                  if (!res.ok) {
+                    alert("Upload failed");
+                    return;
+                  }
+
+                  alert("Upload successful");
+                  setShowWhiteLabelModal(false);
+                }}
+                className="rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2 text-sm font-semibold text-black"
+              >
+                Save
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </main>
   );
+
 }
