@@ -1287,7 +1287,7 @@ export default function FundDetailPage() {
                   }
 
                   const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/upload-white-label`,
+                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/funds/${fund.id}/upload-white-label`,
                     {
                       method: "POST",
                       headers: {
