@@ -35,8 +35,25 @@ export default function LoginPage() {
         throw new Error(data.detail || "Login failed");
       }
 
-      localStorage.setItem("artemis_token", data.access_token);
-      router.push("/");
+            localStorage.setItem("artemis_token", data.access_token);
+
+      const meRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${data.access_token}`,
+        },
+      });
+
+      const me = await meRes.json();
+
+      if (!meRes.ok) {
+        throw new Error(me.detail || "Failed to load user profile");
+      }
+
+      if (me.portal_type === "client") {
+        router.push("/client");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
