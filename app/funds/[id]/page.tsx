@@ -652,7 +652,12 @@ export default function FundDetailPage() {
                   </button>
                   <button
                     type="button"
-                    className="rounded-2xl border border-[#D4AF37]/30 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#F1D36B] transition hover:bg-white/[0.06]"
+                    onClick={async () => {
+                      const link = `${window.location.origin}/prospect-signup?fund_id=${fund.id}`;
+                      await navigator.clipboard.writeText(link);
+                      alert("Prospect link copied to clipboard");
+                    }}
+                    className="rounded-2xl border border-[#D4AF37]/30 bg-white/[0.03] px-5 py-3 text-sm font-medium text-[#F1D36B] hover:bg-white/[0.06]"
                   >
                     Generate Prospect Link
                   </button>
