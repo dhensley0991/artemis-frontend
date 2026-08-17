@@ -217,6 +217,20 @@ export default function Page() {
                 <p className="mt-3 text-3xl font-semibold text-[#F1D36B]">1</p>
               </div>
             </Link>
+
+            <Link href="/accounting" className="block">
+              <div className="cursor-pointer rounded-[28px] border border-[#D4AF37]/30 bg-gradient-to-br from-[#D4AF37]/10 to-white/[0.03] p-5 shadow-2xl transition hover:border-[#D4AF37]/60 hover:bg-white/[0.07]">
+                <p className="text-sm uppercase tracking-[0.18em] text-slate-400">
+                  Accounting &amp; Tax
+                </p>
+                <p className="mt-3 text-2xl font-semibold text-[#F1D36B]">
+                  Ridge Four Ledger
+                </p>
+                <p className="mt-2 text-xs text-slate-400">
+                  S-corp books, AP/AR, 1099s and quarterlies
+                </p>
+              </div>
+            </Link>
           </div>
 
           {/* =========================
