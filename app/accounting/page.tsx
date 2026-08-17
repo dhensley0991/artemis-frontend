@@ -5,9 +5,9 @@ import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type EntryType = "income" | "expense" | "invoice" | "bill" | "contractor" | "shareholder";
-type Entry = { id:string; type:EntryType; date:string; name:string; category:string; amount:number; status:string; memo:string };
+type Entry = { id:string | number; type:EntryType; date:string; name:string; category:string; amount:number; status:string; memo:string };
+type Firm = { id:number; name:string };
 
-const STORAGE_KEY = "artemis_ridge_four_ledger_v1";
 const tabs = ["Overview", "Transactions", "Receivables", "Payables", "Contractors", "Shareholder", "Tax Center", "Reports"];
 const currency = (value:number) => new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits:0 }).format(value);
 
@@ -17,12 +17,28 @@ export default function AccountingPage() {
   const [active,setActive] = useState("Overview");
   const [open,setOpen] = useState(false);
   const [ready,setReady] = useState(false);
+  const [firms,setFirms] = useState<Firm[]>([]);
+  const [firmId,setFirmId] = useState<number | null>(null);
+  const [error,setError] = useState("");
 
   useEffect(() => {
-    if (!localStorage.getItem("artemis_token")) { router.push("/login"); return; }
-    try { setEntries(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")); } catch { setEntries([]); }
-    setReady(true);
+    const token=localStorage.getItem("artemis_token");
+    if (!token) { router.push("/login"); return; }
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/firms`,{headers:{Authorization:`Bearer ${token}`}})
+      .then(async response=>{const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to load firms");return data as Firm[];})
+      .then(data=>{setFirms(data);const ridgeFour=data.find(f=>f.name.toLowerCase().includes("ridge four"));setFirmId((ridgeFour||data[0])?.id||null);setReady(true);})
+      .catch(err=>{setError(err instanceof Error?err.message:"Unable to load firms");setReady(true);});
   }, [router]);
+
+  useEffect(()=>{
+    if(!firmId)return;
+    const token=localStorage.getItem("artemis_token");
+    setError("");
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/accounting/entries?firm_id=${firmId}`,{headers:{Authorization:`Bearer ${token}`}})
+      .then(async response=>{const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to load accounting records");return data as Entry[];})
+      .then(setEntries)
+      .catch(err=>setError(err instanceof Error?err.message:"Unable to load accounting records"));
+  },[firmId]);
 
   const totals = useMemo(() => {
     const income=entries.filter(e=>e.type==="income").reduce((s,e)=>s+e.amount,0);
@@ -34,10 +50,12 @@ export default function AccountingPage() {
 
   const filtered = entries.filter(e => active==="Transactions" ? ["income","expense"].includes(e.type) : active==="Receivables" ? e.type==="invoice" : active==="Payables" ? e.type==="bill" : active==="Contractors" ? e.type==="contractor" : active==="Shareholder" ? e.type==="shareholder" : true);
 
-  function saveEntry(event:FormEvent<HTMLFormElement>) {
+  async function saveEntry(event:FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form=new FormData(event.currentTarget);
-    const next:Entry={id:crypto.randomUUID(),type:String(form.get("type")) as EntryType,date:String(form.get("date")),name:String(form.get("name")),category:String(form.get("category")),amount:Number(form.get("amount")),status:String(form.get("status")),memo:String(form.get("memo")||"")};
-    const updated=[next,...entries]; setEntries(updated); localStorage.setItem(STORAGE_KEY,JSON.stringify(updated)); setOpen(false);
+    if(!firmId)return;
+    const token=localStorage.getItem("artemis_token");
+    const payload={firm_id:firmId,entry_type:String(form.get("type")),entry_date:String(form.get("date")),name:String(form.get("name")),category:String(form.get("category")),amount:Number(form.get("amount")),status:String(form.get("status")),memo:String(form.get("memo")||"")};
+    try{const response=await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/accounting/entries`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to save record");setEntries(current=>[data as Entry,...current]);setOpen(false);setError("");}catch(err){setError(err instanceof Error?err.message:"Unable to save record");}
   }
 
   function exportCsv() {
@@ -53,6 +71,9 @@ export default function AccountingPage() {
         <div className="flex items-center gap-4"><img src="/artemis-transparent-logo.png" alt="Artemis" className="h-14 w-14 object-contain"/><div><p className="text-xs uppercase tracking-[0.2em] text-slate-400">Artemis · Business Operations</p><h1 className="bg-gradient-to-r from-[#F1D36B] to-[#D4AF37] bg-clip-text text-3xl font-semibold text-transparent">Ridge Four Ledger</h1><p className="mt-1 text-sm text-slate-400">Single-member LLC · S corporation · Cash basis</p></div></div>
         <div className="flex gap-2"><Link href="/" className="rounded-xl border border-white/15 px-4 py-2 text-sm">← Admin Center</Link><button onClick={exportCsv} className="rounded-xl border border-white/15 px-4 py-2 text-sm">Export</button><button onClick={()=>setOpen(true)} className="rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#F1D36B] px-4 py-2 text-sm font-semibold text-black">＋ Add record</button></div>
       </header>
+
+      <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs uppercase tracking-[0.16em] text-slate-500">Accounting entity</p><p className="mt-1 text-sm text-slate-300">Records are stored securely in Artemis PostgreSQL.</p></div><select value={firmId||""} onChange={e=>setFirmId(Number(e.target.value))} className="field max-w-sm"><option value="" disabled>Select a firm</option>{firms.map(firm=><option key={firm.id} value={firm.id}>{firm.name}</option>)}</select></div>
+      {error&&<div className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">{error}</div>}
 
       <nav className="mt-5 flex gap-2 overflow-x-auto pb-2">{tabs.map(tab=><button key={tab} onClick={()=>setActive(tab)} className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm ${active===tab?"bg-[#D4AF37] font-semibold text-black":"border border-white/10 bg-white/[0.04] text-slate-300"}`}>{tab}</button>)}</nav>
 
