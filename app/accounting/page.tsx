@@ -10,7 +10,7 @@ type StoredFile = { id:number; invoice_entry_id:number; filename:string; content
 type StoredReceipt = { id:number; expense_entry_id:number; filename:string; content_type:string; size_bytes:number; created_at:string };
 
 const tabs = ["Overview", "Transactions", "Receivables", "Payables", "Contractors", "Shareholder", "Files", "Tax Center", "Reports"];
-const currency = (value:number) => new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits:0 }).format(value);
+const currency = (value:number) => new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", minimumFractionDigits:2, maximumFractionDigits:2 }).format(value);
 const referenceTypes:EntryType[] = ["expense","invoice","bill","contractor","shareholder"];
 const referenceLabels = {bankAccount:"Bank Account",checkNumber:"Check Number",other:"Other"} as const;
 
