@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import TripPlannerWorkflow from "./TripPlannerWorkflow";
 
 type EntryType = "income" | "expense" | "invoice" | "bill" | "contractor" | "shareholder";
 type Entry = { id:string | number; type:EntryType; date:string; name:string; category:string; amount:number; status:string; memo:string };
@@ -152,7 +153,7 @@ export default function AccountingPage() {
 
       {active==="Overview" && <><section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-5"><Metric label="Revenue" value={currency(totals.income)}/><Metric label="Expenses" value={currency(totals.expenses)}/><Metric label="Net profit" value={currency(totals.profit)} gold/><Metric label="Open invoices" value={currency(totals.ar)}/><Metric label="Bills due" value={currency(totals.ap)}/></section><section className="mt-5 grid gap-5 xl:grid-cols-[1.6fr_0.8fr]"><LedgerTable title="Recent activity" entries={entries.slice(0,8)} onEdit={entry=>{setEditing(entry);setOpen(true)}} onDelete={deleteEntry}/><aside className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5"><p className="text-xs uppercase tracking-[0.18em] text-slate-400">Next deadline</p><p className="mt-3 text-3xl font-semibold text-[#F1D36B]">September 15</p><p className="mt-2 text-sm text-slate-300">Q3 federal and Connecticut personal estimates</p><div className="mt-5 space-y-3 text-sm"><Check text="Bank accounts reconciled"/><Check text="Contractor W-9s collected" warning/><Check text="Shareholder salary reviewed" warning/><Check text="Distributions separated"/></div></aside></section></>}
       {["Transactions","Receivables","Payables","Contractors","Shareholder"].includes(active)&&<div className="mt-5">{active==="Receivables"&&<div className="mb-4 flex justify-end"><button onClick={()=>{setEditing(null);setCreatingInvoice(true);setOpen(true)}} className="rounded-xl bg-[#D4AF37] px-4 py-2 text-sm font-semibold text-black">＋ New invoice</button></div>}<LedgerTable title={active} entries={filtered} sortableFilterable={active==="Transactions"} onEdit={entry=>{setEditing(entry);setCreatingInvoice(false);setOpen(true)}} onDelete={deleteEntry} onStatusChange={updateInvoiceStatus}/></div>}
-      {active==="Trip Planner"&&<TripPlanner/>}
+      {active==="Trip Planner"&&<TripPlannerWorkflow onPosted={posted=>setEntries(current=>[...posted,...current])}/>}
       {active==="Mileage"&&<MileagePanel trips={mileageTrips} setTrips={setMileageTrips} setError={setError}/>}
       {active==="Files"&&<FilesPanel files={files} receipts={receipts} entries={entries} onOpen={file=>openStoredFile(file)} onDownload={file=>openStoredFile(file,true)} onDelete={deleteStoredFile} onOpenReceipt={receipt=>openReceipt(receipt)} onDownloadReceipt={receipt=>openReceipt(receipt,true)} onDeleteReceipt={deleteReceipt}/>}
       {active==="Tax Center"&&<TaxCenter totals={taxTotals}/>} {active==="Reports"&&<Reports totals={totals} onExport={exportCsv}/>}
