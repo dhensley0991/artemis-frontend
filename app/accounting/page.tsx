@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 
 type EntryType = "income" | "expense" | "invoice" | "bill" | "contractor" | "shareholder";
 type Entry = { id:string | number; type:EntryType; date:string; name:string; category:string; amount:number; status:string; memo:string };
-type Firm = { id:number; name:string };
 
 const tabs = ["Overview", "Transactions", "Receivables", "Payables", "Contractors", "Shareholder", "Tax Center", "Reports"];
 const currency = (value:number) => new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits:0 }).format(value);
@@ -17,27 +16,16 @@ export default function AccountingPage() {
   const [active,setActive] = useState("Overview");
   const [open,setOpen] = useState(false);
   const [ready,setReady] = useState(false);
-  const [firmId,setFirmId] = useState<number | null>(null);
   const [error,setError] = useState("");
 
   useEffect(() => {
     const token=localStorage.getItem("artemis_token");
     if (!token) { router.push("/login"); return; }
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/firms`,{headers:{Authorization:`Bearer ${token}`}})
-      .then(async response=>{const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to load firms");return data as Firm[];})
-      .then(data=>{const ridgeFour=data.find(f=>f.name.toLowerCase().includes("ridge four holdings"));if(!ridgeFour)throw new Error("Ridge Four Holdings, LLC must be created in Artemis before IgnisRatio can store records.");setFirmId(ridgeFour.id);setReady(true);})
-      .catch(err=>{setError(err instanceof Error?err.message:"Unable to load firms");setReady(true);});
-  }, [router]);
-
-  useEffect(()=>{
-    if(!firmId)return;
-    const token=localStorage.getItem("artemis_token");
-    setError("");
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/accounting/entries?firm_id=${firmId}`,{headers:{Authorization:`Bearer ${token}`}})
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/ignisratio/entries`,{headers:{Authorization:`Bearer ${token}`}})
       .then(async response=>{const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to load accounting records");return data as Entry[];})
-      .then(setEntries)
-      .catch(err=>setError(err instanceof Error?err.message:"Unable to load accounting records"));
-  },[firmId]);
+      .then(data=>{setEntries(data);setReady(true);})
+      .catch(err=>{setError(err instanceof Error?err.message:"Unable to load accounting records");setReady(true);});
+  }, [router]);
 
   const totals = useMemo(() => {
     const income=entries.filter(e=>e.type==="income").reduce((s,e)=>s+e.amount,0);
@@ -51,10 +39,9 @@ export default function AccountingPage() {
 
   async function saveEntry(event:FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form=new FormData(event.currentTarget);
-    if(!firmId)return;
     const token=localStorage.getItem("artemis_token");
-    const payload={firm_id:firmId,entry_type:String(form.get("type")),entry_date:String(form.get("date")),name:String(form.get("name")),category:String(form.get("category")),amount:Number(form.get("amount")),status:String(form.get("status")),memo:String(form.get("memo")||"")};
-    try{const response=await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/accounting/entries`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to save record");setEntries(current=>[data as Entry,...current]);setOpen(false);setError("");}catch(err){setError(err instanceof Error?err.message:"Unable to save record");}
+    const payload={entry_type:String(form.get("type")),entry_date:String(form.get("date")),name:String(form.get("name")),category:String(form.get("category")),amount:Number(form.get("amount")),status:String(form.get("status")),memo:String(form.get("memo")||"")};
+    try{const response=await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/ignisratio/entries`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.detail||"Unable to save record");setEntries(current=>[data as Entry,...current]);setOpen(false);setError("");}catch(err){setError(err instanceof Error?err.message:"Unable to save record");}
   }
 
   function exportCsv() {
@@ -62,7 +49,7 @@ export default function AccountingPage() {
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"})); a.download="ignisratio-ridge-four-ledger.csv"; a.click(); URL.revokeObjectURL(a.href);
   }
 
-  if (!ready) return <main className="min-h-screen bg-black text-white grid place-items-center">Loading Ridge Four Ledger…</main>;
+  if (!ready) return <main className="min-h-screen bg-black text-white grid place-items-center">Loading IgnisRatio…</main>;
 
   return <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(212,175,55,0.08),_transparent_30%),linear-gradient(to_bottom,_#000,_#0b0b0b,_#171717)] text-white">
     <div className="mx-auto max-w-[1500px] px-5 py-6 lg:px-8">
