@@ -224,10 +224,10 @@ export default function Page() {
                   Accounting &amp; Tax
                 </p>
                 <p className="mt-3 text-2xl font-semibold text-[#F1D36B]">
-                  Ridge Four Ledger
+                  IgnisRatio
                 </p>
                 <p className="mt-2 text-xs text-slate-400">
-                  S-corp books, AP/AR, 1099s and quarterlies
+                  Private books for Ridge Four Holdings, LLC
                 </p>
               </div>
             </Link>
