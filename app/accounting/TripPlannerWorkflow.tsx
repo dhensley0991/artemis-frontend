@@ -27,7 +27,7 @@ export default function TripPlannerWorkflow({onPosted,onMileagePosted}:{onPosted
   const api=process.env.NEXT_PUBLIC_API_BASE_URL;const token=()=>localStorage.getItem("artemis_token");
   const headers=()=>({Authorization:`Bearer ${token()}`});
   useEffect(()=>{void loadPlans()},[]);
-  async function json(response:Response){const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.detail||"Trip workflow request failed");return data;}
+  async function json(response:Response){const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(apiErrorMessage(data,"Trip workflow request failed"));return data;}
   async function loadPlans(){try{const data=await json(await fetch(`${api}/ignisratio/trip-plans`,{headers:headers()}));setPlans(data as TripPlan[]);}catch(err){setError(err instanceof Error?err.message:"Unable to load trip plans");}}
   const totals=useMemo(()=>rules.reduce((value,rule)=>{const cost=costs[rule.key];return {estimated:value.estimated+cost.estimated,actual:value.actual+cost.actual,deductible:value.deductible+(rule.rate===null?0:cost.actual*rule.rate)}},{estimated:0,actual:0,deductible:0}),[costs]);
   const unresolved=rules.filter(rule=>costs[rule.key].actual>0&&!(["uploaded","missing"] as ReceiptStatus[]).includes(costs[rule.key].receipt_status));
@@ -56,4 +56,21 @@ function Stat({label,value}:{label:string;value:string}){return <div className="
 function Check({done,text}:{done:boolean;text:string}){return <div className="mb-2 flex items-center gap-2 text-sm"><span className={done?"text-emerald-300":"text-amber-300"}>{done?"✓":"!"}</span><span className="text-slate-300">{text}</span></div>}
 function fileBase64(file:File){return new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");reader.onerror=()=>reject(new Error("Unable to read document"));reader.readAsDataURL(file);});}
 async function findMileageLocation(query:string,proximity?:GeoPoint){const token=process.env.NEXT_PUBLIC_MAPBOX_TOKEN;if(!token)throw new Error("Mapbox is not configured");const qualifiers=query.split(",").slice(1).map(value=>value.trim().toLowerCase()).filter(Boolean);const bias=qualifiers.length?"":proximity?`&proximity=${proximity.longitude},${proximity.latitude}`:"&proximity=ip";const response=await fetch(`https://api.mapbox.com/search/searchbox/v1/forward?q=${encodeURIComponent(query)}&limit=10&country=US&types=poi,address,place,city,locality${bias}&access_token=${token}`);const data=await response.json();const features=data.features||[];const matches=(candidate:{properties?:Record<string,unknown>})=>{const words=JSON.stringify(candidate.properties||{}).toLowerCase().replace(/[^a-z0-9]+/g," ").split(" ").filter(Boolean);return qualifiers.every(qualifier=>qualifier.replace(/[^a-z0-9]+/g," ").split(" ").filter(Boolean).every(word=>words.includes(word)));};const feature=qualifiers.length?features.find(matches):features[0];const coordinates=feature?.geometry?.coordinates;const properties=feature?.properties;if(!response.ok||!coordinates)throw new Error(`Location not found: ${query}`);return {latitude:coordinates[1] as number,longitude:coordinates[0] as number,label:properties?.full_address||[properties?.name,properties?.place_formatted].filter(Boolean).join(", ")||query};}
-async function jsonOrEmpty(response:Response){if(response.status===204)return;if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.detail||"Request failed");}}
+function apiErrorMessage(data:unknown,fallback:string){
+  if(!data||typeof data!=="object")return fallback;
+  const detail=(data as {detail?:unknown}).detail;
+  if(typeof detail==="string"&&detail.trim())return detail;
+  if(Array.isArray(detail)){
+    const messages=detail.map(item=>{
+      if(typeof item==="string")return item;
+      if(!item||typeof item!=="object")return String(item);
+      const issue=item as {loc?:unknown[];msg?:unknown};
+      const location=Array.isArray(issue.loc)?issue.loc.filter(part=>part!=="body").join(" → "):"";
+      const message=typeof issue.msg==="string"?issue.msg:"Invalid value";
+      return location?`${location}: ${message}`:message;
+    }).filter(Boolean);
+    if(messages.length)return messages.join("; ");
+  }
+  return fallback;
+}
+async function jsonOrEmpty(response:Response){if(response.status===204)return;if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(apiErrorMessage(data,"Request failed"));}}
